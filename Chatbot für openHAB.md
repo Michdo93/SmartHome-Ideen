@@ -130,6 +130,36 @@ Neben dem technisch-funktionalen Vorgehen stellt man im Laufe der Verwendung vie
 
 ---
 
+### **Was ist das Ziel?**
+
+* **Verstehen von Benutzeranfragen**: Die KI soll in der Lage sein, einfache Anfragen zu verstehen (z. B. „Wie ist die Temperatur im Wohnzimmer?“ oder „Schalte das Licht ein“).
+* **Interaktion mit openHAB**: Die KI muss diese Anfragen verarbeiten und dann die entsprechenden Aktionen in openHAB auslösen (z. B. den Status von Items abfragen oder Befehle an openHAB senden).
+
+---
+
+### **Möglichkeiten der KI-Entwicklung für diesen Anwendungsfall**
+
+1. **TensorFlow (und Keras)**:
+   TensorFlow ist ein sehr mächtiges Framework für maschinelles Lernen und könnte verwendet werden, um **ein Modell für Textklassifikation** oder **Intent-Erkennung** zu trainieren. Du könntest ein Modell erstellen, das Eingaben (z. B. Benutzernachrichten) in bestimmte Kategorien einordnet und dann den entsprechenden Befehl für openHAB ausgibt.
+
+   **Vorteile**:
+
+   * Flexibilität und Leistung für komplexe Modelle.
+   * Große Community und viele Ressourcen.
+
+   **Nachteile**:
+
+   * TensorFlow kann relativ komplex sein und erfordert eine gewisse Einarbeitung, besonders bei Textdaten.
+
+2. **Alternativen zu TensorFlow:**
+   Hier sind einige andere Frameworks, die sich gut für Textklassifikation und Intent-Erkennung eignen:
+
+   * **spaCy**: Ein schnelles und einfach zu verwendendes NLP-Framework. Es bietet viele vortrainierte Modelle und kann für Named Entity Recognition (NER), Textklassifikation und Intent-Erkennung verwendet werden.
+   * **Rasa**: Eine End-to-End-NLP- und Dialog-Management-Lösung, die speziell für Chatbots entwickelt wurde. Mit Rasa kannst du ein Modell trainieren, das sowohl **Intents** (z. B. „Temperatur abfragen“) als auch **Entitäten** (z. B. „Wohnzimmer“) erkennt und auf diese reagiert.
+   * **Hugging Face Transformers**: Dies ist eine der modernsten NLP-Bibliotheken, die leistungsstarke vortrainierte Modelle wie GPT-3, BERT und T5 enthält. Damit kannst du ein Modell trainieren, das sowohl das Verstehen als auch das Generieren von Text übernimmt.
+
+---
+
 ### **Projektplanung und Struktur**
 
 #### 1. **Systemüberblick**
@@ -414,6 +444,150 @@ Das System könnte folgendermaßen aufgebaut werden:
 Ich denke dies ist bislang nur ein Vorschlag zum Systementwurf. Der ist relativ präzise. Während der Bearbeitung entstehen aber möglicherweise andere Anforderungen bzw. man wird feststellen, dass man manche Dinge vielleicht etwas anders strukturieren und entwickeln muss. Dieses Vorgehen soll jedoch erläutern, wie man sich das geplante System in etwa vorstellen können soll.
 
 ---
+
+### **Ansatz: KI-gestützter Chatbot mit TensorFlow (oder Alternativen)**
+
+#### 1. **Daten sammeln**:
+
+Um ein Modell zu trainieren, musst du zunächst eine Datenbasis aufbauen, die aus **Beispiel-Fragen** und den dazugehörigen **Befehlen** besteht. Diese Daten könnten aussehen wie:
+
+```plaintext
+Frage: "Wie ist die Temperatur im Wohnzimmer?"
+Befehl: "GET:Wohnzimmer_Temperatur"
+
+Frage: "Schalte das Licht im Flur ein."
+Befehl: "SET:Flur_Licht:ON"
+```
+
+Datenbeispiel für das Training (Absicht + Entität):
+
+```plaintext
+"Wie ist die Temperatur im Wohnzimmer?" -> Intent: "Temperatur_abfragen", Entity: "Wohnzimmer"
+"Schalte das Flurlicht ein." -> Intent: "Licht_steuern", Entity: "Flur_Licht", Action: "ON"
+```
+
+#### 2. **Modell mit TensorFlow trainieren**:
+
+##### a. **Daten vorbereiten**:
+
+Du kannst den Text in **numerische Features** umwandeln, z. B. mit einem **Tokenizer** oder einer **Word Embedding**-Methode (wie Word2Vec oder GloVe), um ein Modell zu trainieren.
+
+##### b. **Modellarchitektur**:
+
+Für Textklassifikation eignet sich eine **Neural Network Architektur**, die auf **Recurrent Neural Networks (RNNs)** oder **Long Short-Term Memory (LSTM)** basiert. Eine andere Möglichkeit ist die Verwendung von **Convolutional Neural Networks (CNNs)**, die ebenfalls bei Textklassifikationen gut funktionieren.
+
+Hier ist ein grundlegendes Beispiel, wie ein **Textklassifikator** in TensorFlow mit **Keras** aussehen könnte:
+
+##### Beispielcode mit TensorFlow (LSTM):
+
+```python
+import tensorflow as tf
+from tensorflow.keras import layers, models
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+import numpy as np
+
+# Beispiel-Daten: Frage-Antwort-Paare
+questions = [
+    "Wie ist die Temperatur im Wohnzimmer?",
+    "Schalte das Licht im Flur ein.",
+    "Wie ist die Temperatur im Schlafzimmer?",
+    "Schalte das Wohnzimmerlicht aus."
+]
+
+labels = [
+    "GET:Wohnzimmer_Temperatur",
+    "SET:Flur_Licht:ON",
+    "GET:Schlafzimmer_Temperatur",
+    "SET:Wohnzimmer_Licht:OFF"
+]
+
+# Tokenizer initialisieren
+tokenizer = Tokenizer()
+tokenizer.fit_on_texts(questions)
+sequences = tokenizer.texts_to_sequences(questions)
+X = pad_sequences(sequences, padding='post')
+
+# Labels in numerische Form umwandeln
+label_to_id = {label: idx for idx, label in enumerate(set(labels))}
+y = np.array([label_to_id[label] for label in labels])
+
+# Modell erstellen (LSTM)
+model = models.Sequential([
+    layers.Embedding(input_dim=len(tokenizer.word_index) + 1, output_dim=50, input_length=X.shape[1]),
+    layers.LSTM(64),
+    layers.Dense(32, activation='relu'),
+    layers.Dense(len(label_to_id), activation='softmax')
+])
+
+# Modell kompilieren und trainieren
+model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.fit(X, y, epochs=10, batch_size=2)
+
+# Vorhersage treffen
+def predict_intent(message):
+    sequence = tokenizer.texts_to_sequences([message])
+    padded = pad_sequences(sequence, padding='post', maxlen=X.shape[1])
+    pred = model.predict(padded)
+    predicted_label = np.argmax(pred)
+    return list(label_to_id.keys())[predicted_label]
+
+# Beispiel-Nachricht
+message = "Schalte das Licht im Flur ein."
+predicted_command = predict_intent(message)
+print("Vorhergesagter Befehl:", predicted_command)
+```
+
+Bitte beachte, dass dies nur Pseudocode ist, welcher nicht in eine Gesamtstruktur eingebunden ist.
+
+#### 3. **Daten für Training erweitern**:
+
+Die Qualität des Modells hängt von der Menge und Vielfalt der Trainingsdaten ab. Du kannst die Daten erweitern, indem du mehr Fragen und Antworten hinzufügst. Hier sind einige Beispiele:
+
+```plaintext
+Frage: "Wie ist die Temperatur im Wohnzimmer?"
+Frage: "Wie hoch ist die Temperatur im Wohnzimmer?"
+Frage: "Wie warm ist es im Wohnzimmer?"
+
+Frage: "Schalte das Licht im Flur aus."
+Frage: "Mach das Licht im Flur aus."
+Frage: "Flurlicht aus"
+```
+
+Du kannst auch **Datenaugmentation** verwenden, um deine Trainingsdaten zu erweitern und das Modell robuster zu machen.
+
+---
+
+#### **Alternativen zu TensorFlow**
+
+Wie bereits erwähnt, gibt es auch **andere Tools** wie **Rasa** oder **spaCy**, die sich speziell auf die Entwicklung von Chatbots konzentrieren und dir viele vorgefertigte Modelle und Funktionen bieten, um die Absicht und Entitäten zu erkennen.
+
+* **Rasa**:
+
+  * Open-Source-NLP-Framework für Chatbots.
+  * Bietet eine einfache Möglichkeit, **Intents** und **Entitäten** zu definieren und zu trainieren.
+  * Unterstützt **Sprachdialoge** und kann auch mit openHAB kombiniert werden.
+* **spaCy**:
+
+  * Schnelles und modernes NLP-Toolkit.
+  * Sehr gut für Named Entity Recognition (NER) geeignet und könnte helfen, die verschiedenen Geräte und Werte in deinen Fragen zu erkennen.
+* **Hugging Face**:
+
+  * Diese Bibliothek ist besonders leistungsfähig, wenn du ein **Transformers-Modell** wie BERT oder GPT-2 einsetzen möchtest, um kontextuelle Bedeutung zu verstehen.
+
+---
+
+##### **Zusammenfassung**:
+
+* **TensorFlow** ist eine starke Wahl für das Trainieren eines **Custom NLP-Modells** zur Intent-Erkennung, benötigt aber viele Trainingsdaten und Anpassung.
+* **spaCy** oder **Rasa** bieten dir einfachere Alternativen für einen Chatbot, die spezifische Tools für **Intent-Erkennung und Dialog-Management** bieten.
+* **Hugging Face** könnte eine sehr mächtige Option sein, wenn du tiefer in vortrainierte Modelle wie BERT oder GPT einsteigen möchtest.
+
+Wenn du ein **leichtgewichtiges, spezialisiertes Modell** benötigst, würde ich dir zu **Rasa** oder **spaCy** raten. Möchtest du in eine dieser Richtungen weitergehen? Ich kann dir bei der Integration von Rasa oder spaCy helfen, falls du diese Frameworks ausprobieren möchtest.
+
+---
+
+
 
 ## 🧠 Zusammenfassung:
 
