@@ -818,6 +818,26 @@ Auch hier vielleicht ein Mapping anhand von einer Datenbanktabelle. Es würde Si
 
 Ich denke an diesen Beispieldialogen wird deutlich, dass der Administrator das System durchaus individuell konfigurieren muss.
 
+Macht ein Whitelisting bzw. Blacklisting Sinn? Über eine sogenannte `Whitelist` werden z. B. Things oder Items erlaubt und über eine `Blacklist` verboten. Da der Administrator das System konfigurieren können soll, würde man wahrscheinlich eine `Whitelist` erstellen, heißt bei der Nachfrage, welche Geräte sich z. B. in der Küche befinden, wäre es denkbar, dass nur die in einer Datenbanktabelle gespeicherten Geräte erkannt werden und nicht alle Geräte, die openHAB ansonst kennen würde. Dasselbe Vorgehen würde sich auch bei Funktionen bzw. Items einsetzen lassen.
+
+> **Du**: Dimme das Licht in der Küche auf 20%.
+> **Bot**: Befehl '20' an iSmartHome_Hue_Lampen_Dimmer gesendet. Ergebnis: OK
+
+Bei manchen Befehlen ergibt es zusätzlich Sinn, wenn der Benutzer einen Parameter mitgeben kann.
+
+Wenn wir Synonyme, Mappings und Co. alles mal weglassen, dann kann ein erfahrener Benutzer, der sich mit dem Smart-Home-System auskennt sicherlich auch Eingaben tätigen, wie:
+
+> **Du**: Sende '20' an 'iSmartHome_Hue_Lampen_Dimmer'.
+
+oder
+
+> **Du**: Setze 'iSmartHome_Hue_Lampen_Schalter' auf 'ON'.
+
+oder:
+
+> **Du**: Sende 'ON' an 'iSmartHome_Hue_Lampen_Schalter'.
+
+
 ---
 
 # Hintergrundwissen
