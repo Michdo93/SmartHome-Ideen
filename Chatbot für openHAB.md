@@ -831,11 +831,10 @@ Nehmen wir an, Sie möchten die LD zwischen „Rechnungsnummer“ und „Rechnun
 
 ##### Levenshtein-Abstand Beispiel
 
-```
-    Rechnungnummer → Rechnung**s**nummer (Einfügung von „**s**“) – Abstand: 1
-    Rechnung numr → Rechnungsnu**m**m**e**r (Einfügung von „**m**“ & „**e**“) – Abstand: 2
-    Rechnung nr → Rechnungsn**umme**r (Einfügung von „**u**, **m**, **m**, **e**“) – Abstand: 4
-```
+> **Rechnungnummer** → Rechnung**s**nummer (Einfügung von „**s**“) – Abstand: 1  
+> **Rechnung numr** → Rechnungsnu**m**m**e**r (Einfügung von „**m**“ & „**e**“) – Abstand: 2  
+> **Rechnung nr** → Rechnungsn**u****m****m****e**r (Einfügung von „**u, m, m, e**“) – Abstand: 4
+
 
 #### Hamming-Distanz
 
@@ -861,15 +860,12 @@ Hier unterscheidet sich die Damerau-Levenshtein-Distanz von der regulären Leven
 
 ##### Damerau-Levenshtein Beispiel
 
-```
-Zeichenfolge 1: Re**ch**nun**g**
+> **Zeichenfolge 1:** Re<strong>ch</strong>nun<strong>g</strong>  
+> **Zeichenfolge 2:** Re<strong>hc</strong>nun  
+>   
+> **Operation 1:** Transposition → Vertauschen der Zeichen „**h**“ und „**c**“  
+> **Operation 2:** Einfügen eines „**g**“ am Ende der Zeichenfolge 2
 
-Zeichenfolge 2: Re**hc**nun
-
-Operation 1: Transposition -> Vertauschen der Zeichen “h” und “c”
-
-Operation 2: Einfügen eines “g” am Ende der Zeichenfolge 2
-```
 
 Da zwei Operationen erforderlich waren, um die beiden Wörter identisch zu gestalten, **beträgt der Abstand 2**. Vereinfacht ausgedrückt zählt jede Operation wie Einfügung, Löschung, Transposition usw. als ein Abstand von „1“. Mit der Levenshtein-Distanz müssten Sie jedoch drei Korrekturen vornehmen, was einem Abstand von 3 entspricht.
 
