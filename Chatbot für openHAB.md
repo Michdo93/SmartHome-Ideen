@@ -200,11 +200,217 @@ Die **Trainingsdaten** bestehen aus zwei Hauptkomponenten:
 * **Examples**: Beispiele für Nachrichten, die dem Intent zugeordnet werden.
 * **Entities**: Bestimmte Entitäten (z. B. „Wohnzimmer“, „Flur\_Licht“) aus den Beispielen.
 
----
-
-
+Ebenfalls wird deutlich, warum man so etwas wie Synonyme benötigt. Es kann z.B. heißen `Licht ein` oder `Licht an`.
 
 ---
+
+#### 3. **Struktur der Anwendung**
+
+* **Flask** verwaltet die Routen für die Benutzeroberfläche, den Chat und das Admin-Panel.
+* **Datenbank** (z. B. SQLite oder MySQL): Speichert Benutzeranfragen und Trainingsdaten.
+
+##### **Datenbanktabellen**
+
+* **users**: Speichert Benutzer- und Admin-Daten (für Login).
+
+  ```sql
+  CREATE TABLE users (
+      id INT PRIMARY KEY AUTO_INCREMENT,
+      username VARCHAR(100),
+      password VARCHAR(255),  -- Gespeichert als Hash
+      role ENUM('user', 'admin')
+  );
+  ```
+
+* **chat\_history**: Speichert Chatnachrichten zwischen Benutzern und dem Bot.
+
+  ```sql
+  CREATE TABLE chat_history (
+      id INT PRIMARY KEY AUTO_INCREMENT,
+      user_id INT,
+      message TEXT,
+      response TEXT,
+      timestamp DATETIME,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+  );
+  ```
+
+Rein theoretisch könnte man mit Reinforcement Learning auch den Chatverlauf für das Training wiederverwenden.
+
+* **training\_data**: Speichert Trainingsdaten für das Modell.
+
+  ```sql
+  CREATE TABLE training_data (
+      id INT PRIMARY KEY AUTO_INCREMENT,
+      intent VARCHAR(100),
+      example TEXT,
+      entity VARCHAR(100),
+      value VARCHAR(100)
+  );
+  ```
+
+Für **Synonyme** muss man nun ein bisschen komplizierter vorgehen. Hier reicht eine einzige Tabelle nicht aus. Man hat eine `n:m`-Beziehung, bedeutet man muss drei Tabellen anlegen.
+
+Um eine Tabelle für Synonyme in SQL zu erstellen, solltest du eine Datenstruktur wählen, die flexible Beziehungen zwischen Wörtern erlaubt – insbesondere eine **n\:m-Beziehung** (also viele zu vielen). Denn ein Wort kann mehrere Synonyme haben, und ein Synonym kann wiederum für mehrere Wörter gelten.
+
+Lösung: Drei Tabellen
+
+Du kannst drei Tabellen verwenden:
+
+1. **`woerter`** – Liste aller Wörter.
+2. **`synonyme`** – Liste aller Synonym-Gruppen oder Paarungen.
+3. **`wort_synonym`** – Verknüpfungstabelle, die die n\:m-Beziehung abbildet.
+
+Beispielstruktur:
+
+```sql
+-- Tabelle für Wörter
+CREATE TABLE woerter (
+    id SERIAL PRIMARY KEY,
+    wort TEXT NOT NULL UNIQUE
+);
+
+-- Tabelle für Synonymgruppen
+CREATE TABLE synonymgruppen (
+    id SERIAL PRIMARY KEY
+);
+
+-- Verknüpfungstabelle zwischen Wörter und Synonymgruppen
+CREATE TABLE wort_synonym (
+    wort_id INT REFERENCES woerter(id),
+    synonymgruppe_id INT REFERENCES synonymgruppen(id),
+    PRIMARY KEY (wort_id, synonymgruppe_id)
+);
+```
+
+Beispiel für die Nutzung:
+
+Wenn du z. B. eine Synonymgruppe für „Auto“, „Wagen“ und „Fahrzeug“ erstellen willst:
+
+```sql
+-- Wörter einfügen
+INSERT INTO woerter (wort) VALUES ('Auto'), ('Wagen'), ('Fahrzeug');
+
+-- Neue Synonymgruppe erstellen
+INSERT INTO synonymgruppen DEFAULT VALUES;
+
+-- IDs abfragen
+SELECT id FROM synonymgruppen ORDER BY id DESC LIMIT 1; -- z. B. id = 1
+SELECT id FROM woerter WHERE wort IN ('Auto', 'Wagen', 'Fahrzeug'); -- z. B. 1,2,3
+
+-- Verknüpfungen herstellen
+INSERT INTO wort_synonym (wort_id, synonymgruppe_id) VALUES
+(1, 1), (2, 1), (3, 1);
+```
+
+Abfragebeispiel: Synonyme für „Auto“ finden
+
+```sql
+SELECT w2.wort
+FROM woerter w1
+JOIN wort_synonym ws1 ON w1.id = ws1.wort_id
+JOIN wort_synonym ws2 ON ws1.synonymgruppe_id = ws2.synonymgruppe_id
+JOIN woerter w2 ON ws2.wort_id = w2.id
+WHERE w1.wort = 'Auto' AND w2.wort != 'Auto';
+```
+
+Alternative: Direkte Paarweise Speicherung (nur bei einfacher Beziehung)
+
+Falls du nur einfache paarweise Synonyme speichern willst (weniger flexibel):
+
+```sql
+CREATE TABLE synonyme (
+    wort1 TEXT NOT NULL,
+    wort2 TEXT NOT NULL,
+    PRIMARY KEY (wort1, wort2)
+);
+```
+
+Das ist allerdings bei größeren Synonymgruppen schwer wartbar und schlecht erweiterbar.
+
+Eventuell ergibt es sogar Sinn, dass man Synonyme nicht in einzelne Worte denkt, sondern vielleicht in ganzen Sätze oder Teilsätze.
+
+Wie genau eine Tabelle für **Modelle** aussieht, hängt letzen Endes sehr stark von dem entwickelten Modell ab. Dies ist dann auch unter Umständen abhängig davon, ob man z. B. spaCy verwendet oder Tensorflow, usw. Vorteile der Speicherung der Modelle hat es, dass man nicht nur zwangsläufig das zuletzt trainierte Modell verwenden kann. Man könnte z. B. im Benutzerchat eine Funktion anbieten, mit der man zwischen den Modellen wechselt (ähnlich, wie z. B. bei ChatGPT). Auch können ältere Modellversionen möglicherweise auch für ein Reinforcement Learning verwendet werden. Im Zweifelsfall kann auch eine Datenbanktabelle für Modelle einfach auch nur als Backup dienen.
+
+Nach einem Training soll das Modell am besten automatisch in eine Datenbank gespeichert werden. Es empfiehlt sich, dass ein Zeitstempel des letzten Trainings gespeichert wird und das es vielleicht ein Feld mit Versionsnummer gibt, welches automatisch iteriert (Das neueste Modell hat immer eine höhere Zahl, als das vorherige. Hier empfiehlt es sich `Integer` als Datentyp zu verwenden).
+
+---
+
+#### 4. **Funktionsweise des Admin-Panels**
+
+* **Admin-Panel**:
+
+  * **Daten hinzufügen**: Admins können neue **Intents** und **Beispiel-Fragen** hinzufügen (über ein Webformular).
+  * **Synonyme hinzufügen**: Admins können neue **Synonyme** hinzufügen (über ein Webformular).  
+  * **Modell-Training starten**: Ein Button zum Starten des Trainingsprozesses. Nach Klick wird der Backend-Prozess angestoßen, der die Trainingsdaten nimmt und das Modell trainiert. (Ein neues Modell soll nachdem Training automatisch in die Datenbank gespeichert werden)
+
+  ##### **Beispiel für ein Admin-Formular**:
+
+  * **Intent**: Auswahl eines vorhandenen Intents oder Eingabe eines neuen Intents.
+
+  * **Beispiel-Fragen**: Textfeld, in das Admins neue Fragen eingeben können, die dem Intent zugeordnet werden.
+
+  * **Entitäten**: Eingabefelder für die Entitäten (z. B. Raumnamen oder Geräte).
+
+  * **Button „Trainieren“**: Wenn der Admin auf diesen Button klickt, wird der Trainingsprozess angestoßen.
+
+Ein Beispiel für das Speichern der Synonym-Liste lasse ich hier ausnahmsweise weg. Ergibt sich aus den Datenbanktabellen.
+
+---
+
+#### 5. **Automatisiertes Lernen aus Chatnachrichten**
+
+Um das Modell **dynamisch** zu trainieren, können auch **Benutzereingaben** als Trainingsdaten verwendet werden. Dies könnte so ablaufen:
+
+* **Interaktionen speichern**: Jede Nachricht, die der Benutzer sendet, wird zusammen mit der Antwort des Bots in der **Datenbank** gespeichert.
+* **Trainingsdaten generieren**: Ein Admin kann dann alle gespeicherten Benutzernachrichten durchsuchen und entscheiden, ob diese in das Training aufgenommen werden sollen.
+* **Verfeinerung**: Nach einer gewissen Anzahl von Interaktionen kann das Modell mit diesen neuen Beispielen neu trainiert werden, um auf häufig gestellte Fragen und neue Anfragen besser zu reagieren.
+
+---
+
+#### 6. **Trainingsprozess**
+
+* **Button „Trainieren“**: Wenn der Admin den Button klickt, wird das System:
+
+  * Die aktuellen Trainingsdaten aus der Datenbank abrufen.
+  * Das Modell (z. B. TensorFlow oder spaCy) mit den neuen Daten trainieren.
+  * Die neuen Modellparameter speichern und das aktualisierte Modell im Backend bereitstellen.
+
+Auch hier muss man sich möglicherweise überlegen, ob man die Modellparameter oder das ganze Modell speichert. Vermutlich ergibt sogar beides Sinn. Die Modellparameter können ja über andere Tabellen bereits gespeichert sein und würden für ein erneutes Training ja bereits ausreichen.
+
+---
+
+#### 7. **Projektaufbau (Workflow)**
+
+* **Login**: Benutzer und Admins melden sich an.
+* **Benutzer-Chat**: Normale Benutzer können mit dem Bot interagieren, ihre Nachrichten werden gespeichert.
+* **Admin-Paneel**: Admins können Daten für das Training hinzufügen und das Modell trainieren.
+* **Training starten**: Admin klickt auf „Trainieren“, um das Modell mit neuen Daten zu trainieren.
+* **Modell verwenden**: Sobald das Modell trainiert ist, wird es für die Chatbot-Interaktionen verwendet.
+
+---
+
+#### 8. **Dynamisches Lernen im Chat**
+
+Um das Modell kontinuierlich zu verbessern, könnten Benutzereingaben nach einer **Bestätigung** durch den Admin ins Training aufgenommen werden. Dies wäre eine Form des „**aktiven Lernens**“ (engl. **active learning**).
+
+#### **Zusammenfassung**:
+
+Das System könnte folgendermaßen aufgebaut werden:
+
+1. **Frontend** (Flask + HTML/JS) für den Chat und Admin-Bereich.
+2. **Backend** (Flask + Python) zur Verarbeitung von Nachrichten und Verwaltung des Trainingsprozesses.
+3. **Datenbank** zur Speicherung von Benutzerinformationen, Chats und Trainingsdaten.
+4. **Modelltraining** über einen Admin-Button, der das Modell mit den neuesten Trainingsdaten aktualisiert.
+
+**Wichtige Schritte für den Aufbau**:
+
+1. Design und Implementierung der **Datenbankstruktur**.
+2. Aufbau der **Flask-Anwendung** für den Chat und das Admin-Panel.
+3. Erstellung der **Trainingslogik** und Integration des **KI-Modells**.
+4. Erstellung der **Admin-Oberfläche** zur Verwaltung von Trainingsdaten und Training des Modells.
+
+Ich denke dies ist bislang nur ein Vorschlag zum Systementwurf. Der ist relativ präzise. Während der Bearbeitung entstehen aber möglicherweise andere Anforderungen bzw. man wird feststellen, dass man manche Dinge vielleicht etwas anders strukturieren und entwickeln muss. Dieses Vorgehen soll jedoch erläutern, wie man sich das geplante System in etwa vorstellen können soll.
 
 ---
 
