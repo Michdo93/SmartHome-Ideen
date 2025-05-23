@@ -848,9 +848,8 @@ Nehmen wir die folgenden Textzeichenfolgen „Number“ und „Lumber“ als Bei
 
 Beispielrechnung:
 
-```
-**D** = N – L = 1001110 – 1001100 = **10**
-```
+> **D** = N – L = 1001110 – 1001100 = **10**
+
 
 #### Damerau-Levenshtein
 
