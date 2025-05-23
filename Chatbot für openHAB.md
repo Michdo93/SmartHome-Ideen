@@ -832,9 +832,9 @@ Nehmen wir an, Sie möchten die LD zwischen „Rechnungsnummer“ und „Rechnun
 ##### Levenshtein-Abstand Beispiel
 
 ```
-    Rechnungnummer → Rechnung<strong>s</strong>nummer (Einfügung von „<strong>s</strong>“) – Abstand: 1
-    Rechnung numr → Rechnungsnu<strong>m</strong>m<strong>e</strong>r (Einfügung von „<strong>m</strong>“ & „<strong>e</strong>“) – Abstand: 2
-    Rechnung nr → Rechnungsn<strong>umme</strong>r (Einfügung von „<strong>u</strong>, <strong>m</strong>, <strong>m</strong>, <strong>e</strong>“) – Abstand: 4
+    Rechnungnummer → Rechnung**s**nummer (Einfügung von „**s**“) – Abstand: 1
+    Rechnung numr → Rechnungsnu**m**m**e**r (Einfügung von „**m**“ & „**e**“) – Abstand: 2
+    Rechnung nr → Rechnungsn**umme**r (Einfügung von „**u**, **m**, **m**, **e**“) – Abstand: 4
 ```
 
 #### Hamming-Distanz
@@ -862,9 +862,9 @@ Hier unterscheidet sich die Damerau-Levenshtein-Distanz von der regulären Leven
 ##### Damerau-Levenshtein Beispiel
 
 ```
-Zeichenfolge 1: Re<strong>ch</strong>nun<strong>g</strong>
+Zeichenfolge 1: Re**ch**nun**g**
 
-Zeichenfolge 2: Re<strong>hc</strong>nun
+Zeichenfolge 2: Re**hc**nun
 
 Operation 1: Transposition -> Vertauschen der Zeichen “h” und “c”
 
