@@ -773,22 +773,30 @@ In diesem Szenario brauchst du keine KI, sondern baust einen **regelbasierten Ch
 
 ---
 
-## ✅ Beispiel-Dialog
+## ✅ Beispiel-Dialoge
+
+Fragen nach einem Systemzustand:
 
 > **Du:** Wie warm ist es im Wohnzimmer?
+
 > **Bot:** Der aktuelle Zustand von Wohnzimmer\_Temperatur ist: 22.5 °C
 
+Senden von einem Befehl:
+
 > **Du:** Schalte das Flurlicht ein.
+
 > **Bot:** Befehl 'ON' an Flur\_Licht gesendet. Ergebnis: OK
 
 Anmerkung: Die Items können natürlich sehr viele eigene Namen haben.
 
 > **Du:** Schalte das Licht im Smart-Home-Labor ein.
+
 > **Bot:** Befehl 'ON' an iSmartHome_Hue_Lampen_Schalter gesendet. Ergebnis: OK
 
 Auch könnte man Things anstelle von Items abfragen.
 
 > **Du**: Welche Geräte gibt es in der Küche?
+
 > **Bot**: In der Küche gibt es einen Backofen, einen Kaffeevollautomaten, einen Herd, eine Dunstabzugshaube, einen Geschirrspüler, einen Wasserkocher, einen Kühlschrank und einen Lautsprecher. Möchtest du, dass ich eines dieser Geräte für dich bediene oder möchtest du einen bestimmten Zustand von einem Gerät abfragen?
 
 Fragen:
@@ -803,6 +811,7 @@ Lösungsmöglichkeiten:
 * ...
 
 > **Du**: Welche Funktionen hat der Kaffeevollautomat?
+
 > **Bot**: Ein/Ausschalten, Reinigen, Kaffee brühen, usw. Möchtest du, dass ich dir einen Kaffee brühe?
 
 Auch hier vielleicht ein Mapping anhand von einer Datenbanktabelle. Es würde Sinn ergeben, wenn sowohl Things als auch Items gemappt werden, sodass der Text schöner lesbar ist. Alternativ müsste man sonst alle Items auflisten.
