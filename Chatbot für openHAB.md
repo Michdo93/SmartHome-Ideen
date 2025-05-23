@@ -170,7 +170,7 @@ Im Unterschied zu Intents dienen Entitys oder auch Entities dazu, Informationen 
 
 Grundsätzlich unterscheiden wir zwischen System-Entities und Customize-Entities. Die System-Entites sind voreingestellt, das heißt im System bereits enthalten. Darunter fallen etwa Zahlen, Uhrzeiten oder Adressen. Diese Entities sind besonders beliebt und wurden in der Vergangenheit besonders häufig verwendet. Die Customize-Entities dagegen sind selbst definierte Werte, die auf den jeweiligen Use-Case angepasst werden.
 
-‍### Ein Beispiel für Entities in der Praxis
+### Ein Beispiel für Entities in der Praxis
 
 🙎‍♂️: „Wann kommt mein Produkt Chatbot-Experte in der Landstraße 5 an?“
 
