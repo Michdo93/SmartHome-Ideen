@@ -117,6 +117,95 @@ Dazu braucht der Client (z. B. in Python oder als App):
 
 ![picture alt](https://raw.githubusercontent.com/Michdo93/SmartHome-Ideen/refs/heads/main/screenshots/chatbot.png)
 
+### Idee
+
+Aufbau eines **KI-gestützten Chatbots mit einer Web-Oberfläche** zur Verwaltung und **Training** in einem System wie **Flask**. Der Workflow würde sicherstellen, dass **Admins** das Modell trainieren können, ohne tief in den Code einzugreifen, sondern alles über eine Benutzeroberfläche (Admin-Dashboard) steuern. Auch das dynamische **Trainieren des Modells** basierend auf neuen Benutzereingaben ist eine spannende Herausforderung.
+
+Warum dieses Vorgehen?
+
+Ein Smart-Home-System wie openHAB wird immer wieder erweitert. Es kommen neue Geräte und somit Things hinzu, zudem es entsprechend immer wieder neuere Items gibt. Eventuell werden alte Geräte ausgetauscht und gar entfernt, was dazu führt, dass man die dazugehörigen Things und Items ebenfalls löscht. Für den Chatbot bedeutet dies, dass er natürlich immer nur auf den aktuellen Stand des Smart-Homes reagieren soll. Ein Chatbot, welches Informationen von alten Geräten ausgeben möchte, würde zum einen nichts bringen und zum anderen vermutlich gar keien Informationen zurückliefern können. Ebenfalls wäre der Versuch Geräte zu steuern, die gar nicht vorhanden sind fatal. Ein neues Gerät, welches man steuern möchte, könnte dann ebenfalls nicht über den Chatbot gesteuert werden.
+
+Neben dem technisch-funktionalen Vorgehen stellt man im Laufe der Verwendung vielleicht auch fest, dass man Optimierungen haben möchte. Man kann das Modell ja nicht nur neu trainieren, weil Geräte hinzugefügt oder gelöscht wurden, sondern man möchte vielleicht andere Eingaben nutzen, mögliche Synonyme usw., weil man ja viele Sätze nie gleich formuliert. Mit unterschiedlichen Sätzen möchte man aber am Ende unter Umstände das gleiche Ergebnis erzielen. Wenn man dies entsprechend konfigurieren und trainieren kann, hilft dies, die Anwendung benutzerfreundlicher und individueller für den/die Anwender zu gestalten.
+
+---
+
+### **Projektplanung und Struktur**
+
+#### 1. **Systemüberblick**
+
+* **Frontend (Flask + HTML/JS)**:
+
+  * Web-Oberfläche mit einem Login-System.
+  * **Benutzer-Chat**: Normale Benutzer können mit dem Bot interagieren.
+  * **Admin-Panel**: Admins können Daten für das Training hinzufügen und das Modell neu trainieren.
+  * **Datenbank (z. B. SQLite/MySQL)**: Speichern der Trainingsdaten, Chatverläufe, Synonym-Liste, Benutzeraccounts und Modelle.
+
+* **Backend (Flask + Python)**:
+
+  * Flask-Anwendung für die Kommunikation mit dem Frontend und die Verarbeitung der Anfragen.
+  * **Modelltraining**: Das Backend wird in der Lage sein, das Modell basierend auf den eingegebenen Daten zu trainieren.
+  * **Modell-API**: Ein API-Endpunkt, der auf Chat-Anfragen reagiert, basierend auf einem trainierten Modell.
+
+* **Modell-Training (TensorFlow / Rasa / spaCy / Hugging Face)**:
+
+  * Das Modell wird auf Basis der hinzugefügten Trainingsdaten **dynamisch** trainiert.
+
+#### 2. **Benötigte Daten für das Modell-Training**
+
+Um das Modell zu trainieren, benötigen wir **beispielhafte Fragen (Intents)** und **Entitäten**, die das Modell später klassifizieren soll. Diese Daten können durch **manuelles Hinzufügen** im Admin-Bereich oder durch **automatisches Lernen** aus den Benutzer-Chat-Eingaben generiert werden.
+
+##### Beispiel für Trainingsdaten (strukturierte Form)
+
+Die **Trainingsdaten** bestehen aus zwei Hauptkomponenten:
+
+* **Intents**: Was der Benutzer zu erreichen versucht (z. B. „Temperatur abfragen“).
+* **Entitäten**: Bestimmte Informationen aus der Nachricht (z. B. „Wohnzimmer“ als Raumname).
+
+###### Beispiel:
+
+```json
+{
+    "intents": [
+        {
+            "intent": "Temperatur_abfragen",
+            "examples": [
+                "Wie ist die Temperatur im Wohnzimmer?",
+                "Was ist die Temperatur im Schlafzimmer?",
+                "Wie warm ist es im Wohnzimmer?"
+            ],
+            "entities": [
+                {"entity": "Raum", "value": "Wohnzimmer"},
+                {"entity": "Raum", "value": "Schlafzimmer"}
+            ]
+        },
+        {
+            "intent": "Licht_steuern",
+            "examples": [
+                "Schalte das Licht im Flur ein.",
+                "Mach das Licht im Wohnzimmer an.",
+                "Licht aus im Flur."
+            ],
+            "entities": [
+                {"entity": "Gerät", "value": "Flur_Licht"},
+                {"entity": "Gerät", "value": "Wohnzimmer_Licht"}
+            ]
+        }
+    ]
+}
+```
+
+##### Erklärungen:
+
+* **Intent**: Die allgemeine Bedeutung der Anfrage (z. B. „Temperatur\_abfragen“ oder „Licht\_steuern“).
+* **Examples**: Beispiele für Nachrichten, die dem Intent zugeordnet werden.
+* **Entities**: Bestimmte Entitäten (z. B. „Wohnzimmer“, „Flur\_Licht“) aus den Beispielen.
+
+---
+
+
+
+---
+
 ---
 
 ## 🧠 Zusammenfassung:
