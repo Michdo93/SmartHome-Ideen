@@ -1158,4 +1158,75 @@ class DeviceTrainer(context: Context) {
 
 ---
 
+#### Grundgerüst
+
+Das Grundgerüst für die App:
+
+```
+// Datei: DeviceTrainer.kt
+package com.example.aropenhab.ml
+
+import android.content.Context
+import android.graphics.Bitmap
+import org.tensorflow.lite.task.vision.classifier.ImageClassifier
+import org.tensorflow.lite.support.image.TensorImage
+import java.util.*
+
+class DeviceTrainer(private val context: Context) {
+
+    private var classifier: ImageClassifier? = null
+
+    init {
+        // Modell laden (z. B. MobileNet V1 via Model Personalization)
+        val options = ImageClassifier.ImageClassifierOptions.builder()
+            .setMaxResults(1)
+            .build()
+        classifier = ImageClassifier.createFromFileAndOptions(
+            context,
+            "mobilenet_v1.tflite", // Dummy-Modell, ersetzbar
+            options
+        )
+    }
+
+    fun predictDevice(bitmap: Bitmap): String {
+        val image = TensorImage.fromBitmap(bitmap)
+        val results = classifier?.classify(image)
+        return results?.firstOrNull()?.categories?.firstOrNull()?.label ?: "Unknown"
+    }
+
+    fun trainDevice(name: String, images: List<Bitmap>) {
+        // Hier müsstest du ein Personalization-Modul ergänzen,
+        // z. B. mit TFLite Model Maker (mobilen Support bauen)
+        // Pseudocode für Erweiterung:
+        // model.updateWithImages(name, images)
+    }
+
+    fun saveModel(name: String): Boolean {
+        // Speicher-Logik implementieren, z. B. exportiertes tflite-Modell
+        return false
+    }
+}
+```
+
+* Kotlin-Klasse `DeviceTrainer.kt`
+* Ladefunktion für ein Basis-Modell (MobileNet V1)
+* Bildklassifizierung per `ImageClassifier`
+* Platzhalter für On-Device-Training (erweiterbar mit Model Personalization)
+
+---
+
+## 🔜 Nächste Schritte:
+
+1. 📂 Projektstruktur (Android Studio)
+2. 📷 Kamera-Integration (CameraX)
+3. 🧠 TFLite Model Maker/Personalization für dynamisches Training
+4. 🌐 openHAB REST-Aufrufe zur Steuerung
+
+Soll ich nun auch:
+
+* Die `CameraX`-Integration einbauen?
+* Das Live-Bildklassifizierungs-Overlay mit Jetpack Compose oder Sceneform machen?
+* Eine UI für das Gerätekonfigurations-Training erstellen?
+
+Sag einfach z. B. „Ja, bitte Kamera & UI hinzufügen“.
 
