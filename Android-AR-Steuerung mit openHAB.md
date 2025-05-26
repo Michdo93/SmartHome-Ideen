@@ -96,6 +96,184 @@ Eine einfache View, in der man die notwendigen Daten für die REST API von openH
 * API-Token der openHAB-Instanz
 * URL der openHAB-Instanz
 
+##### Beispielhafte Implementierung
+
+Die Konfigurations-UI ist ein zentraler Bestandteil deiner App, da sie die Kommunikation mit der openHAB-Instanz steuert.
+
+1. Eine **UI-View** in Jetpack Compose (modernes Android UI)
+2. Die dazugehörige **State-Verwaltung**
+3. Die **Modellierung der Konfiguration**
+4. Eine **Beispiel-Implementierung**, wie du den Header für REST-Anfragen erzeugst
+
+---
+
+###### 🧱 1. Datenmodell
+
+```kotlin
+data class OpenHabConfig(
+    val url: String = "",
+    val username: String = "",
+    val password: String = "",
+    val apiToken: String = "",
+    val useApiToken: Boolean = false
+)
+```
+
+---
+
+###### 🎨 2. Jetpack Compose UI
+
+```kotlin
+@Composable
+fun OpenHabConfigScreen(
+    config: OpenHabConfig,
+    onConfigChanged: (OpenHabConfig) -> Unit
+) {
+    var url by remember { mutableStateOf(config.url) }
+    var username by remember { mutableStateOf(config.username) }
+    var password by remember { mutableStateOf(config.password) }
+    var apiToken by remember { mutableStateOf(config.apiToken) }
+    var useApiToken by remember { mutableStateOf(config.useApiToken) }
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text("Authentifizierungsmethode", style = MaterialTheme.typography.titleMedium)
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(
+                selected = !useApiToken,
+                onClick = {
+                    useApiToken = false
+                    onConfigChanged(
+                        config.copy(useApiToken = false)
+                    )
+                }
+            )
+            Text("Basic Auth")
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            RadioButton(
+                selected = useApiToken,
+                onClick = {
+                    useApiToken = true
+                    onConfigChanged(
+                        config.copy(useApiToken = true)
+                    )
+                }
+            )
+            Text("API Token")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = url,
+            onValueChange = {
+                url = it
+                onConfigChanged(config.copy(url = url))
+            },
+            label = { Text("URL der openHAB-Instanz") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        if (useApiToken) {
+            OutlinedTextField(
+                value = apiToken,
+                onValueChange = {
+                    apiToken = it
+                    onConfigChanged(config.copy(apiToken = apiToken))
+                },
+                label = { Text("API Token") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            OutlinedTextField(
+                value = username,
+                onValueChange = {
+                    username = it
+                    onConfigChanged(config.copy(username = username))
+                },
+                label = { Text("Benutzername") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = password,
+                onValueChange = {
+                    password = it
+                    onConfigChanged(config.copy(password = password))
+                },
+                label = { Text("Passwort") },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+```
+
+---
+
+###### 🔑 3. Header-Generierung für REST-Anfragen
+
+Nutze diese Funktion, um den passenden Auth-Header abhängig von der gewählten Methode zu erzeugen:
+
+```kotlin
+fun getAuthHeader(config: OpenHabConfig): Map<String, String> {
+    return if (config.useApiToken) {
+        mapOf("Authorization" to "Bearer ${config.apiToken}")
+    } else {
+        val credentials = "${config.username}:${config.password}"
+        val encoded = Base64.encodeToString(credentials.toByteArray(), Base64.NO_WRAP)
+        mapOf("Authorization" to "Basic $encoded")
+    }
+}
+```
+
+---
+
+###### 💾 4. Speicherung in `SharedPreferences` oder Room
+
+Du kannst diese Konfiguration entweder in Room speichern (z. B. als Singleton-Tabelle) **oder einfacher über SharedPreferences**:
+
+```kotlin
+fun saveOpenHabConfig(context: Context, config: OpenHabConfig) {
+    val prefs = context.getSharedPreferences("openhab_prefs", Context.MODE_PRIVATE)
+    prefs.edit().apply {
+        putString("url", config.url)
+        putString("username", config.username)
+        putString("password", config.password)
+        putString("apiToken", config.apiToken)
+        putBoolean("useApiToken", config.useApiToken)
+        apply()
+    }
+}
+
+fun loadOpenHabConfig(context: Context): OpenHabConfig {
+    val prefs = context.getSharedPreferences("openhab_prefs", Context.MODE_PRIVATE)
+    return OpenHabConfig(
+        url = prefs.getString("url", "") ?: "",
+        username = prefs.getString("username", "") ?: "",
+        password = prefs.getString("password", "") ?: "",
+        apiToken = prefs.getString("apiToken", "") ?: "",
+        useApiToken = prefs.getBoolean("useApiToken", false)
+    )
+}
+```
+
+---
+
+###### ✅ Ergebnis
+
+Mit dieser Lösung kannst du:
+
+* Zwischen Basic Auth und API Token umschalten
+* Die openHAB-Zugangsdaten sicher verwalten
+* Diese Daten zur Authentifizierung bei REST-Calls verwenden
+
 ### AR-Szene mit Kamerastream und 3D UI-Overlay mit Menü
 
 Eine View, in der man sieht, was die Kamera des Smartphones zeigt. Sobald man über ein 3D-Objekt fährt, welches bedient werden kann, öffnet sich in dieser View ein Frame mit der Bedienung zu diesem Gerät. Das 3D-Objekt kann bspw. mit Unity erstellt sein und durch die Anbindung von Vuforia über ein Mapping erkannt werden. Damit dies funktioniert, müsste man die trainierte Datenbank von Vuforia bei neu hinzugefügten Geräte ebenfalls aktualisieren. Ebenfalls zu überlegen ist, dass für die App grundlegend fertige 3D-Objekte in Unity schon vorgefertigt sind, damit wenn ein Gerät auch erkannt wird, dieses 3D-Objekt angezeigt werden kann. In der Gerätedatenbank müsste man dann diesem Gerät ein 3D-Objekt und Bilder zur Erkennung im Kamerastream hinzufügen. Als Alternative kann bspw. auch ARCore verwendet werden.
