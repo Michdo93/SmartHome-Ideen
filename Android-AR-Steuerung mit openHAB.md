@@ -258,3 +258,142 @@ Mit `Room` oder klassisch mit `SQLiteOpenHelper`.
 
 ---
 
+Gerne! Hier ist ein vollständiges **Room-Datenbankmodell** für dein AR/openHAB-Projekt mit Unterstützung für:
+
+* Geräteverwaltung
+* Mehrere Bilder pro Gerät (Referenzbilder)
+* Speicherung der Bildpfade im Dateisystem
+
+---
+
+#### 📦 **1. Datenbankstruktur (Room)**
+
+##### 🗂 `DeviceEntity.kt`
+
+```kotlin
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "devices")
+data class DeviceEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val openhabItemId: String
+)
+```
+
+---
+
+##### 🖼 `DeviceImageEntity.kt`
+
+```kotlin
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.PrimaryKey
+
+@Entity(
+    tableName = "device_images",
+    foreignKeys = [ForeignKey(
+        entity = DeviceEntity::class,
+        parentColumns = ["id"],
+        childColumns = ["deviceId"],
+        onDelete = ForeignKey.CASCADE
+    )]
+)
+data class DeviceImageEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val deviceId: Long,
+    val imagePath: String // z. B. /data/data/.../files/devices/lamp1_1.jpg
+)
+```
+
+---
+
+#### 🔁 **2. DAO-Interfaces**
+
+##### `DeviceDao.kt`
+
+```kotlin
+import androidx.room.*
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface DeviceDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertDevice(device: DeviceEntity): Long
+
+    @Query("SELECT * FROM devices")
+    fun getAllDevices(): Flow<List<DeviceEntity>>
+
+    @Query("SELECT * FROM devices WHERE id = :id")
+    suspend fun getDeviceById(id: Long): DeviceEntity?
+}
+```
+
+---
+
+##### `DeviceImageDao.kt`
+
+```kotlin
+import androidx.room.*
+
+@Dao
+interface DeviceImageDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertImage(image: DeviceImageEntity): Long
+
+    @Query("SELECT * FROM device_images WHERE deviceId = :deviceId")
+    suspend fun getImagesForDevice(deviceId: Long): List<DeviceImageEntity>
+
+    @Delete
+    suspend fun deleteImage(image: DeviceImageEntity)
+}
+```
+
+---
+
+#### 🧩 **3. Datenbank-Klasse**
+
+##### `AppDatabase.kt`
+
+```kotlin
+import androidx.room.Database
+import androidx.room.RoomDatabase
+
+@Database(entities = [DeviceEntity::class, DeviceImageEntity::class], version = 1)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun deviceDao(): DeviceDao
+    abstract fun deviceImageDao(): DeviceImageDao
+}
+```
+
+---
+
+#### 🚀 **4. Nutzung in deiner App (z. B. ViewModel oder Repository)**
+
+```kotlin
+val db = Room.databaseBuilder(
+    context,
+    AppDatabase::class.java,
+    "device_database"
+).build()
+
+val newDevice = DeviceEntity(name = "Wohnzimmerlampe", openhabItemId = "Light_Livingroom")
+val deviceId = db.deviceDao().insertDevice(newDevice)
+
+val imagePath = saveBitmapToInternalStorage(context, bitmap, "lamp1_1.jpg")
+db.deviceImageDao().insertImage(DeviceImageEntity(deviceId = deviceId, imagePath = imagePath))
+```
+
+---
+
+#### ✅ Vorteile dieser Lösung
+
+* Skalierbar: Beliebig viele Bilder pro Gerät
+* Sicher: Geräte und Bilder sind logisch verknüpft
+* Kompatibel: Ideal für AR mit Bildvergleich
+* Persistenz: Einfach zu sichern oder exportieren
+
+---
