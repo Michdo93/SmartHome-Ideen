@@ -11,6 +11,7 @@ Im Rahmen dieser Bachelorthesis soll eine Android-App entwickelt werden, die mit
 * Visualisierung von Geräten mittels 3D-Modellen und Interaktionsmenüs im Kamerabild
 * Konfigurationsmenüs zum Hinzufügen neuer Geräte (per Fotos) und Verwaltung der REST-Verbindung zu openHAB
 * Bilderkennung zum Abgleich von Geräten im Raum
+* Vergleich der verschiedenen Lösungsansätze
 
 ## Anforderungen
 
