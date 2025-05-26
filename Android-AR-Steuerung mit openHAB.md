@@ -575,3 +575,587 @@ db.deviceImageDao().insertImage(DeviceImageEntity(deviceId = deviceId, imagePath
 * Persistenz: Einfach zu sichern oder exportieren
 
 ---
+
+## Mögliche AR-Vorgehensweise
+
+### Unity + Vuforia
+
+Wenn du **Unity + Vuforia** verwenden möchtest, um eine **AR-App für openHAB-Gerätesteuerung** zu bauen (basierend auf Bild-Tracking + REST-Steuerung), ist hier ein kompletter Überblick, wie du schrittweise vorgehen solltest:
+
+---
+
+#### 🧩 **1. Voraussetzungen**
+
+* **Unity Hub** installiert
+* **Unity Version** (z. B. 2021.3 LTS oder 2022.x) mit Android Build Support
+* **Vuforia Engine** (kostenlos, benötigt Developer License Key)
+* Android-Smartphone zum Testen
+* openHAB-Instanz mit aktivierter REST-API (Standard bei openHAB 2/3/4)
+
+---
+
+#### 🏗️ **2. Unity-Projekt einrichten**
+
+##### 🔧 Unity Setup
+
+1. Neues Unity-Projekt erstellen (3D Template)
+2. In Unity:
+
+   * `File` → `Build Settings` → `Android` auswählen und `Switch Platform`
+   * `Player Settings`:
+
+     * `Minimum API Level`: Android 8.0 oder höher
+     * `XR Settings`: Haken bei `Vuforia Augmented Reality Supported`
+
+##### 📦 Vuforia Engine einbinden
+
+1. Öffne `Edit > Project Settings > XR Plug-in Management`
+2. Aktiviere unter Android den **Vuforia AR Support**
+3. Erstelle dir bei [developer.vuforia.com](https://developer.vuforia.com/) ein Konto
+4. Erzeuge einen **License Key**
+5. In Unity:
+
+   * Öffne das `Vuforia Configuration` Fenster (`Window > Vuforia Engine > Configuration`)
+   * Füge deinen License Key ein
+
+---
+
+#### 🎯 **3. Bildziel(e) festlegen (Target Images)**
+
+##### Vuforia Target Manager
+
+1. Gehe zu: [Vuforia Target Manager](https://developer.vuforia.com/target-manager)
+2. Erstelle eine **Device Database**
+3. Lade Referenzbilder (Fotos deiner echten Geräte) hoch
+4. Lade die Datenbank für **Unity** als `.unitypackage` herunter und importiere sie
+
+##### In Unity:
+
+1. Ziehe ein **ARCamera**-Prefab in deine Szene (`GameObject > Vuforia Engine > AR Camera`)
+2. Füge ein **ImageTarget** hinzu (`GameObject > Vuforia Engine > Image Target`)
+3. Wähle dein Bildziel aus der importierten Datenbank aus
+
+---
+
+#### 🖼️ **4. UI & Steuerung über openHAB**
+
+##### a) 3D UI als Menü über dem Gerät
+
+1. Füge ein **Canvas** als Child des `ImageTarget` hinzu (z. B. World Space)
+2. Erstelle darauf Buttons (z. B. "Licht an", "Licht aus")
+
+##### b) Steuerung über HTTP (UnityWebRequest)
+
+```csharp
+using UnityEngine;
+using UnityEngine.Networking;
+using System.Text;
+
+public class OpenHabController : MonoBehaviour
+{
+    public string openHabUrl = "http://192.168.1.10:8080";
+    public string itemName = "Light_Livingroom";
+    public string authToken = ""; // Optional
+
+    public void SwitchOn()
+    {
+        SendCommand("ON");
+    }
+
+    public void SwitchOff()
+    {
+        SendCommand("OFF");
+    }
+
+    void SendCommand(string command)
+    {
+        StartCoroutine(SendCommandCoroutine(command));
+    }
+
+    IEnumerator SendCommandCoroutine(string command)
+    {
+        var url = $"{openHabUrl}/rest/items/{itemName}";
+        var request = new UnityWebRequest(url, "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(command);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "text/plain");
+
+        if (!string.IsNullOrEmpty(authToken))
+            request.SetRequestHeader("Authorization", $"Bearer {authToken}");
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+            Debug.Log("Command sent: " + command);
+        else
+            Debug.LogError("Error: " + request.error);
+    }
+}
+```
+
+Dann die `SwitchOn()` / `SwitchOff()`-Funktionen über Buttons aufrufen.
+
+---
+
+#### 🗃️ **5. Gerätekonfiguration & Daten speichern**
+
+* Du kannst eine eigene JSON-Datei mit Geräten + Bildzuordnungen speichern
+* Oder in Unity z. B. `PlayerPrefs` oder `Application.persistentDataPath` verwenden
+* Optional: Externe SQLite-Datenbank (z. B. über [SQLite for Unity](https://assetstore.unity.com/packages/tools/input-management/sqlite-kit-57402))
+
+---
+
+#### 📱 **6. App Build auf Android**
+
+1. `File > Build Settings > Android`
+2. Szene hinzufügen und `Build & Run`
+3. Android-Gerät muss USB-Debugging aktiviert haben
+
+---
+
+#### ✅ Zusammenfassung: Was du brauchst
+
+| Aufgabe                       | Tool / Technik              |
+| ----------------------------- | --------------------------- |
+| AR-Kamera & Tracking          | Vuforia + ImageTargets      |
+| UI zur Steuerung              | Unity Canvas (World Space)  |
+| REST-Steuerung openHAB        | UnityWebRequest             |
+| Konfiguration speichern       | PlayerPrefs oder JSON       |
+| Bilddatenbank für AR-Tracking | Vuforia Target Manager      |
+| Authentifizierung             | HTTP-Header (Token / Basic) |
+
+---
+
+Du kannst **aktuelle Bilder aus deiner App verwenden**, um sie **zur Laufzeit** als **Image Targets in Vuforia** zu verwenden – **aber mit Einschränkungen**.
+
+##### 🔍 Problem: Vuforia unterstützt **nur zur Compile-Zeit eingebundene Image Targets** direkt
+
+Standardmäßig funktioniert Vuforia nur mit **vordefinierten Target-Datenbanken**, die du vorher über den **Vuforia Target Manager** erstellst und in Unity importierst.
+
+---
+
+#### ✅ Optionen zur Nutzung von **aktuellen Bildern aus deiner App**
+
+##### 🟡 **Option 1: Vuforia Model Targets / Cloud Recognition (nur mit Lizenz & Server)**
+
+Vuforia bietet:
+
+* **Cloud Recognition**: Du kannst Bilder aus der App an Vuforia-Server schicken → wird dort mit deiner Cloud-Datenbank abgeglichen
+* ➕ Funktioniert zur Laufzeit
+* ➖ Erfordert Vuforia Cloud Lizenz (kostenpflichtig)
+
+➡️ [Vuforia Cloud Recognition Info](https://library.vuforia.com/articles/Solution/How-To-Use-Cloud-Recognition)
+
+---
+
+##### 🟢 **Option 2: Alternativen mit ARCore + ML/AI Matching (ohne Vuforia)**
+
+Wenn du unbedingt **eigene Bilder zur Laufzeit hinzufügen willst**, dann wäre dieser Weg flexibler:
+
+| Baustein                       | Beschreibung                                           |
+| ------------------------------ | ------------------------------------------------------ |
+| **ARCore**                     | Erkennt reale Umgebung (ohne fixe Targets)             |
+| **ML Kit / TensorFlow Lite**   | Für Bildvergleich / Gerätematching zur Laufzeit        |
+| **Eigene Bilderdatenbank**     | SQLite oder Room (Name + Item-ID + Referenzbilder)     |
+| **CameraX / Bitmap-Vergleich** | Fotos aus Kamera mit gespeicherten Bildern vergleichen |
+
+Damit kannst du:
+
+* Ein Gerät live fotografieren
+* Mit deinen gespeicherten Geräten (und deren Bildern) vergleichen
+* Bei Übereinstimmung → UI anzeigen + openHAB steuern
+
+---
+
+##### 🔴 **Was nicht geht (ohne Tricks):**
+
+> Du kannst **nicht** direkt ein `ImageTarget` in Vuforia zur Laufzeit mit einem **neuen Bild aus deiner App** definieren.
+
+---
+
+#### 🧠 Fazit: Was tun?
+
+| Ziel                                       | Lösung                                      | Aufwand               |
+| ------------------------------------------ | ------------------------------------------- | --------------------- |
+| **Bilder zur Laufzeit erkennen & steuern** | 👉 ARCore + eigenes Matching (z. B. ML Kit) | mittel                |
+| **Vordefinierte Geräte erkennen**          | 👉 Vuforia + ImageTargets                   | gering                |
+| **Cloud-Erkennung mit Bildern**            | 👉 Vuforia Cloud                            | hoch, kostenpflichtig |
+
+Anders ausgedrückt:
+
+Mit Unity + Vuforia kann man zumindest als kostenlose Android App nur eine Anwendung explizit für ein einziges Smart Home entwickeln. Man muss gezielt diese App maßschneidern, dass es genau in diesem Smart Home funktioniert. Wälzt man die Kosten der Cloud auf den Endnutzer ab, könnte man zumindest eine App entwickeln, mit der zum Teil während der Bedienung der App neue Geräte hinzugefügt und trainiert werden könnten.
+
+---
+
+## ARCore und Machine Learning
+
+Super Entscheidung! 🎯 Mit **ARCore & ML (z. B. ML Kit oder TensorFlow Lite)** baust du eine **flexible AR-App**, bei der du:
+
+* eigene Bilder aus der App verwenden kannst (z. B. Geräte live fotografieren),
+* Geräte anhand dieser Bilder wiedererkennst (via Machine Learning),
+* und dann in der AR-Szene passende Steuer-UI über das erkannte Objekt legst (z. B. „Licht einschalten“ via openHAB REST).
+
+---
+
+### 🧠 Architekturüberblick
+
+```
++----------------------------+
+|        Android App        |
+|---------------------------|
+|  ARCore (Kamera/Tracking) |
+|  CameraX (Live-Foto)      |
+|  ML-Modul (Bildvergleich) |
+|  Room (Gerätebilder)      |
+|  openHAB REST-Client      |
++----------------------------+
+          |
+          ↓
+[AR-Szene erkennt Objekt im Raum]
+          ↓
+[Übereinstimmung mit Gerätedatenbank]
+          ↓
+[Overlay-Menü für Steuerung]
+```
+
+---
+
+### 📱 Beispiel-Ablauf in deiner App
+
+1. **Gerät registrieren**
+
+   * Du machst 3–5 Fotos vom Gerät (z. B. Steckdose)
+   * Vergibst Name + openHAB Item-ID
+   * Die Bilder + Daten landen in einer `Room`-Datenbank
+
+2. **Beim Durchlaufen des Raumes**
+
+   * ARCore erkennt die Umgebung (Plane Detection + Pose Estimation)
+   * Du nimmst laufend Bilder aus der Kamera (CameraX)
+   * Die App vergleicht aktuelle Bilder mit gespeicherten Geräten per **Bildvergleich (ML)**
+
+3. **Wenn ein Gerät erkannt wurde**
+
+   * Es erscheint ein Menü-Overlay (z. B. 3D-Knopf in der AR-Szene)
+   * Per Klick wird ein openHAB-REST-Befehl gesendet (z. B. „ON“)
+
+---
+
+### 🧰 Technologien, die du brauchst
+
+| Zweck                  | Framework                                      | Hinweise                          |
+| ---------------------- | ---------------------------------------------- | --------------------------------- |
+| AR                     | [ARCore](https://developers.google.com/ar)     | z. B. Sceneform, ARCore Jetpack   |
+| Kamera-Bilder          | CameraX                                        | Modern, leicht in Jetpack Compose |
+| Bildvergleich          | ML Kit Image Labeling **oder** TensorFlow Lite | ML Kit einfacher für Start        |
+| Datenbank Gerätebilder | Room (SQLite)                                  | Name, Item-ID, Bildpfade          |
+| REST API zu openHAB    | Retrofit                                       | Mit Basic/Auth Token              |
+| UI/Overlays            | Jetpack Compose + AR Anchor Nodes              | Overlay im Raum rendern           |
+
+---
+
+### 🧪 ML-Vergleich: Wie geht das?
+
+#### ✅ **Einfache Lösung mit ML Kit (kein eigenes Modell nötig)**
+
+ML Kit kann:
+
+* Label in Bildern erkennen (z. B. „Lampe“, „Steckdose“)
+* Custom Image Classification (mit eigenem Modell oder Aufklebern)
+
+Alternativen:
+
+* **Eigenes TinyML-Modell** trainieren (z. B. mit [Teachable Machine](https://teachablemachine.withgoogle.com/))
+* Export als `.tflite`
+* Einbinden mit TensorFlow Lite Interpreter
+
+---
+
+### 🧩 Gerätemodell in Room (Beispiel)
+
+```kotlin
+@Entity(tableName = "devices")
+data class DeviceEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val name: String,
+    val itemId: String,
+    val label: String,
+)
+
+@Entity(tableName = "device_images")
+data class DeviceImageEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val deviceId: Int,
+    val imagePath: String // lokal gespeichertes JPEG
+)
+```
+
+---
+
+### 🧠 Workflow in Code (vereinfacht)
+
+```kotlin
+// Schritt 1: Bild aufnehmen
+val photo = cameraX.takePicture()
+
+// Schritt 2: Durch ML-Kit schicken
+val result = mlModel.classify(photo)
+
+// Schritt 3: Prüfen ob Label mit einem bekannten Gerät übereinstimmt
+val matchedDevice = deviceDao.getByLabel(result.label)
+
+// Schritt 4: Falls Gerät erkannt, UI anzeigen
+if (matchedDevice != null) {
+    showOverlayMenuForDevice(matchedDevice)
+}
+```
+
+---
+
+### 📦 Projektstruktur (Android-Kotlin)
+
+```
+com.yourapp.aropenhab
+│
+├── data/
+│   └── room/
+│       ├── DeviceDao.kt
+│       ├── DeviceEntity.kt
+│       └── AppDatabase.kt
+│
+├── ar/
+│   └── ARSceneManager.kt  ← ARCore & Anchors
+│
+├── ml/
+│   └── DeviceClassifier.kt ← TensorFlow Lite Wrapper oder ML Kit
+│
+├── ui/
+│   ├── DeviceConfigScreen.kt ← Compose UI zur Geräteverwaltung
+│   └── AROverlayMenu.kt
+│
+└── network/
+    └── OpenHabClient.kt  ← REST-Client mit Retrofit
+```
+
+---
+
+### ✅ Vorteile dieses Ansatzes:
+
+* Du kannst **beliebige neue Geräte** hinzufügen (Fotos in der App)
+* Kein manuelles Hochladen zu Vuforia nötig
+* Du bist **nicht auf vordefinierte Targets beschränkt**
+* Kompatibel mit lokalen ML-Modellen (offline möglich!)
+
+---
+
+Großartig! Hier ist dein vollständiger Leitfaden für die Erstellung einer **Android AR-App**, die mithilfe von **ARCore**, **Machine Learning (ML Kit oder TensorFlow Lite)** und **Sceneform** Geräte erkennt und über **openHAB** steuert.
+
+---
+
+#### 🔨 1. Vollständiges Beispielprojekt
+
+Ein umfassendes Beispielprojekt, das ARCore mit ML Kit integriert, findest du im offiziellen Google-Beispiel:
+
+👉 [ARCore ML Sample (GitHub)](https://github.com/googlesamples/arcore-ml-sample)
+
+Dieses Projekt demonstriert, wie man ARCore verwendet, um Kamera-Frames zu erfassen, ML Kit zur Objekterkennung einzusetzen und Ergebnisse in der AR-Szene darzustellen. Es ist in Kotlin geschrieben und bietet eine solide Grundlage für deine Anwendung.
+
+---
+
+#### 🧪 2. Bildvergleich mit ML Kit oder Teachable Machine (TensorFlow Lite)
+
+##### Option A: ML Kit
+
+**ML Kit** bietet eine einfache Möglichkeit, Objekte in Bildern zu erkennen:
+
+* **Vorteile**:
+
+  * Einfache Integration in Android-Apps
+  * Echtzeit-Erkennung
+  * Offline-Funktionalität
+
+* **Implementierung**:
+
+  * Verwende ML Kits Objekterkennungs- und Tracking-API
+  * Integriere die API in deine App, um Objekte in Kamera-Frames zu erkennen
+
+👉 [ML Kit Objekterkennung Codelab](https://codelabs.developers.google.com/mlkit-android-odt)
+
+##### Option B: Teachable Machine mit TensorFlow Lite
+
+**Teachable Machine** ermöglicht es dir, ein benutzerdefiniertes Modell zu erstellen:
+
+* **Schritte**:
+
+  1. Gehe zu [Teachable Machine](https://teachablemachine.withgoogle.com/)
+  2. Erstelle ein neues Bildprojekt
+  3. Lade Bilder deiner Geräte hoch und trainiere das Modell
+  4. Exportiere das Modell im TensorFlow Lite-Format
+  5. Integriere das `.tflite`-Modell in deine Android-App
+
+* **Implementierung**:
+
+  * Verwende TensorFlow Lite Interpreter, um das Modell in deiner App zu nutzen
+  * Verarbeite Kamera-Frames und führe Inferenz durch, um Geräte zu erkennen
+
+👉 [Teachable Machine Android Integration Tutorial](https://medium.com/geekculture/build-a-custom-image-classification-android-app-using-teachable-machine-f60b197eaa90)
+
+---
+
+#### 🧱 3. Live-Overlay mit Sceneform oder ARCore Jetpack
+
+**Sceneform** ermöglicht es, 3D-Modelle in AR-Szenen darzustellen:
+
+* **Implementierung**:
+
+  * Verwende `ArFragment` für die AR-Sitzung
+  * Erstelle `AnchorNode` und `TransformableNode`, um 3D-Modelle an erkannte Positionen zu binden
+  * Füge UI-Elemente (z. B. Buttons) hinzu, um Geräte über openHAB zu steuern
+
+👉 [Sceneform Samples](https://developers.google.com/sceneform/develop/samples)
+
+**Hinweis**: Sceneform wird nicht mehr aktiv gepflegt, funktioniert aber weiterhin für viele Anwendungen. Alternativ kannst du OpenGL oder andere 3D-Rendering-Engines in Betracht ziehen.
+
+---
+
+#### 📦 Projektstruktur
+
+```
+com.yourapp.aropenhab
+│
+├── data/
+│   └── room/
+│       ├── DeviceDao.kt
+│       ├── DeviceEntity.kt
+│       └── AppDatabase.kt
+│
+├── ar/
+│   └── ARSceneManager.kt  ← ARCore & Anchors
+│
+├── ml/
+│   └── DeviceClassifier.kt ← TensorFlow Lite Wrapper oder ML Kit
+│
+├── ui/
+│   ├── DeviceConfigScreen.kt ← Compose UI zur Geräteverwaltung
+│   └── AROverlayMenu.kt
+│
+└── network/
+    └── OpenHabClient.kt  ← REST-Client mit Retrofit
+```
+
+## Handy trainiert selbst
+
+Wenn du möchtest, dass dein **Handy selbstständig trainiert**, dann sprichst du von **On-Device Training**, also:
+
+> 📱 Dein Android-Gerät **lernt eigenständig** neue Geräte zu erkennen – direkt aus der App heraus, ohne externes Training am PC oder Cloud.
+
+Das ist technisch **sehr anspruchsvoll**, aber **machbar** mit modernen ML-Frameworks wie **TensorFlow Lite + Model Personalization**.
+
+---
+
+#### 🔍 Was bedeutet „das Handy trainiert selbst“?
+
+Das bedeutet, deine App:
+
+1. 📷 Nimmt **Fotos von einem neuen Gerät** auf
+2. 🧠 **Trainiert ein Modell direkt auf dem Gerät** (online learning)
+3. 💾 Speichert dieses Modell oder die erlernten Merkmale
+4. 🔍 Nutzt es später, um ähnliche Geräte automatisch zu erkennen
+
+---
+
+#### 🛠️ Technologien dafür
+
+| Aufgabe                     | Framework                                 | Status                     |
+| --------------------------- | ----------------------------------------- | -------------------------- |
+| On-Device Training          | **TensorFlow Lite + Personalization SDK** | ✅ (offiziell, stabil)      |
+| Edge-Training für Bilder    | **MediaPipe + TFLite**                    | 🟡 (erfordert Optimierung) |
+| Persistente Modellanpassung | Custom Classifier Layer                   | ✅                          |
+
+---
+
+#### 🧱 Architektur für On-Device Learning
+
+```
++---------------------------+
+|     Android AR App        |
+|---------------------------|
+| ARCore (Umgebung)         |
+| CameraX (Live-Fotos)      |
+| TFLite Model (mobil)      |
+| Training-Modul (lokal)    | ← Nutzer trainiert per Foto
+| Geräte-Datenbank (Room)   |
+| openHAB-REST Integration  |
++---------------------------+
+```
+
+---
+
+#### ✅ Vorgehen Schritt für Schritt
+
+##### 1. 📸 Fotos aufnehmen vom neuen Gerät
+
+```kotlin
+// z.B. 5 Bilder aufnehmen
+val imageList = takePhotoSeries(deviceName)
+```
+
+##### 2. 🧠 Custom-Training auf dem Gerät starten
+
+Du trainierst nicht das komplette Modell, sondern nur die **letzte Klassifikationsschicht** (Transfer Learning).
+
+###### Beispiel mit TensorFlow Lite Model Personalization:
+
+```kotlin
+val classifier = PersonalizedImageClassifier(context)
+classifier.train(deviceName, imageList)
+```
+
+🔧 Es nutzt:
+
+* MobileNet oder EfficientNet als Basis
+* Die neuen Bilder nur für Feintuning (Last Layer)
+
+##### 3. 💾 Modell speichern oder erweitern
+
+```kotlin
+classifier.saveModel(context, "trained_model.tflite")
+```
+
+Oder dynamisch im RAM halten und später anpassen.
+
+##### 4. 🔍 Inferenz: Gerät erkennen
+
+```kotlin
+val prediction = classifier.predict(liveCameraFrame)
+if (prediction.label == "Steckdose") {
+   showAROverlay("Steckdose", position)
+}
+```
+
+---
+
+#### 🧪 Tools für dich
+
+| Tool                                                                                                           | Beschreibung                   | Link |
+| -------------------------------------------------------------------------------------------------------------- | ------------------------------ | ---- |
+| [TFLite Model Maker](https://www.tensorflow.org/lite/tutorials/model_maker_image_classification)               | Modell trainieren              | ✅    |
+| [TFLite Model Personalization](https://www.tensorflow.org/lite/performance/model_personalization)              | On-Device-Training             | ✅    |
+| [MediaPipe AutoML Training](https://developers.google.com/mediapipe/solutions/vision/image_classifier/android) | Visual Classifier mit Training | 🟡   |
+
+---
+
+#### 📦 Beispielhafte Kotlin-Klassenstruktur
+
+```kotlin
+class DeviceTrainer(context: Context) {
+    fun trainDevice(name: String, images: List<Bitmap>) { ... }
+    fun predictDevice(image: Bitmap): String { ... }
+    fun saveModel(name: String): Boolean { ... }
+}
+```
+
+---
+
+
