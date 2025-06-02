@@ -20,7 +20,7 @@ Sprachassistenten wie Alexa, Siri oder Google Assistant haben sich im Alltag vie
 
 ---
 
-### Problemstellung
+### Problemstellung im Detail
 
 - Cloudverbindungen können auch öfter mal gestört oder abgebrochen sein.
   - Ein lokaler Sprachassistent würde zumindest lokal funktionierende Befehle bearbeiten und lokal verfügbare Informationen zur Verfügung stellen können.
