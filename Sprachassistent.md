@@ -270,6 +270,8 @@ Nicht selten sind es auch dieselben Cloud-Dienstleister, wie bei `Text-to-Speech
 * `python-openhab-rest-client` (für openHAB)
 * `SQLAlchemy` (für Datenbanken)
 
+Es wird noch eine genauere Planung benötigt, wie ein solches System funktonieren soll.
+
 ---
 
 ### 🧱 **5. Architekturübersicht (Ablauf)**
@@ -278,6 +280,12 @@ Nicht selten sind es auch dieselben Cloud-Dienstleister, wie bei `Text-to-Speech
 [Mikrofon] → [Hotword Detection] → [Spracherkennung (ASR)] → [Intent-Erkennung (NLU)]
             → [Antwort (Aktion/Dialog)] → [Text-To-Speech] → [Lautsprecher]
 ```
+
+Was hier in der Architektur nicht drinnen ist, ist was mit den Intents passiert. Mit diesen kann ich ja zum Beispiel openHAB steuern oder Zustände aus openHAB abfragen. Ich könnte ja auch andere Systeme anbinden. Außerdem muss ja gar keine Antwort verbal erfolgen. Bei einer `WENN-DANN`-Regel hätte ich hier, dass auf eine spezielle Spracheingabe eine spezielle Sprachausgabe erfolgen würde. Ich kann ja auch etwas anderes machen und erhalte dann eine Sprachausgabe oder ich habe eine Spracheingabe ohne Sprachausgabe und mache damit irgendetwas völlig anderes (z. B. Geräte bedienen).
+
+Es fehlt zum Beispiel, ob es eine Benutzeroberfläche gibt, mit der man `WENN-DANN`-Regel konfiguriert. Es fehlt eine Architekturbetrachtung, ob Datenbanken oder andere Systeme angebunden sind. Es fehlt eine Architekturbetrachtung, wie ein KI-Model angebunden ist. Wie wird was überhaupt trainiert?
+
+Dies bedarf noch einer genaueren Planung.
 
 #### Beispiel-Stack (lokal lauffähig):
 
@@ -864,5 +872,188 @@ Ich denke eins wird klar sein: Alexa nutzt bspw. verschiedene Skills. Mit diesen
 * Fachliteratur
 * Dokumentationen verwendeter Tools
 * Onlinequellen mit Zugriffsdatum
+
+---
+
+## Beispielprojekt
+
+Hier ist ein **Beispielprojekt für einen lokalen Sprachassistenten** mit Fokus auf Modularität, Verständlichkeit und Erweiterbarkeit – ideal als Startpunkt für deine Bachelorarbeit.
+
+Anmerkung: Das ist vom zu entwickelten Prototypen noch meilenweit entfernt.
+
+---
+
+### 📁 Projekt-Setup: `voice_assistant/`
+
+```plaintext
+voice_assistant/
+├── main.py                       # Einstiegspunkt: orchestration der Komponenten
+├── config/
+│   └── settings.yaml             # Konfiguration (Hotword, STT, NLU, TTS)
+├── hotword/
+│   └── detector.py               # Hotword-Erkennung (Porcupine / Precise)
+├── stt/
+│   └── transcriber.py            # Speech-to-Text (Whisper / Vosk)
+├── nlu/
+│   └── intent_parser.py          # Intent-Erkennung (Rasa / Regex)
+├── tts/
+│   └── synthesizer.py            # Text-to-Speech (Coqui TTS)
+├── core/
+│   └── actions.py                # Antwortlogik / Aktionshandler
+├── utils/
+│   └── audio_utils.py            # Mikrofonaufnahme, Audio-Konvertierung
+├── data/
+│   └── intents.yaml              # Trainingsdaten für Intents
+└── requirements.txt              # Python-Abhängigkeiten
+```
+
+---
+
+### 🧠 Komponentenüberblick mit Mini-Codebeispielen
+
+#### 1. `main.py`
+
+```python
+from hotword.detector import wait_for_hotword
+from stt.transcriber import transcribe_audio
+from nlu.intent_parser import parse_intent
+from tts.synthesizer import speak
+from core.actions import handle_intent
+
+def main():
+    print("System bereit. Sag das Hotword...")
+    while True:
+        wait_for_hotword()
+        audio = utils.audio_utils.record_input()
+        text = transcribe_audio(audio)
+        intent = parse_intent(text)
+        response = handle_intent(intent)
+        speak(response)
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+#### 2. `hotword/detector.py` (z. B. mit `pvporcupine`)
+
+```python
+import pvporcupine
+import pyaudio
+
+def wait_for_hotword():
+    porcupine = pvporcupine.create(keywords=["computer"])
+    audio_stream = pyaudio.PyAudio().open(
+        rate=porcupine.sample_rate,
+        channels=1,
+        format=pyaudio.paInt16,
+        input=True,
+        frames_per_buffer=porcupine.frame_length,
+    )
+    while True:
+        pcm = audio_stream.read(porcupine.frame_length)
+        pcm = list(int.from_bytes(pcm[i:i+2], 'little', signed=True) for i in range(0, len(pcm), 2))
+        if porcupine.process(pcm) >= 0:
+            break
+```
+
+---
+
+#### 3. `stt/transcriber.py` (mit `whisper`)
+
+```python
+import whisper
+
+model = whisper.load_model("base")
+
+def transcribe_audio(audio_path="input.wav"):
+    result = model.transcribe(audio_path)
+    return result["text"]
+```
+
+---
+
+#### 4. `nlu/intent_parser.py` (Regel- oder Rasa-basiert)
+
+```python
+import yaml
+
+with open("data/intents.yaml", "r") as f:
+    intent_data = yaml.safe_load(f)
+
+def parse_intent(text):
+    text = text.lower()
+    for intent, patterns in intent_data.items():
+        for pattern in patterns:
+            if pattern in text:
+                return intent
+    return "unknown"
+```
+
+Beispiel für `data/intents.yaml`:
+
+```yaml
+play_music:
+  - spiel musik
+  - mach musik an
+  - spiele ein lied
+get_time:
+  - wie spät ist es
+  - sag mir die uhrzeit
+  - wie viel uhr
+```
+
+---
+
+#### 5. `tts/synthesizer.py` (z. B. mit `pyttsx3` oder `coqui-tts`)
+
+```python
+import pyttsx3
+
+engine = pyttsx3.init()
+
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+```
+
+---
+
+#### 6. `core/actions.py`
+
+```python
+from datetime import datetime
+
+def handle_intent(intent):
+    if intent == "get_time":
+        return f"Es ist {datetime.now().strftime('%H:%M')} Uhr."
+    elif intent == "play_music":
+        return "Okay, ich spiele Musik ab."
+    else:
+        return "Das habe ich leider nicht verstanden."
+```
+
+---
+
+### 📦 `requirements.txt`
+
+```txt
+pvporcupine
+pyaudio
+whisper
+torch
+pyttsx3
+pyyaml
+```
+
+---
+
+### 🛠️ Was du jetzt damit machen kannst
+
+* 🔄 Eigene Intents und Aktionen hinzufügen
+* 🔍 Komponenten austauschen (z. B. Whisper → Vosk, pyttsx3 → Coqui TTS)
+* 🧪 Performance- oder Vergleichsexperimente implementieren
+* 🔐 Datenschutz-Konzept einbauen (lokale vs. Cloud-Verarbeitung vergleichen)
 
 ---
