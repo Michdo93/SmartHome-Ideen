@@ -1567,6 +1567,10 @@ Um Verbal TTS zu beschreiben empfiehlt es sich ebenfalls Worte wie "kodieren" un
 
 > Text-to-Speech ist eine Kombination von Prozessen und Software, die einen digitalen Text in synthetische menschliche Sprache kodiert und konvertiert.
 
+### STTS und TTSS
+
+Bei cloudbasierten Services spricht man auch gerne von `STTS` und `TTSS`, also von `Speech-to-Text-Services` und `Text-to-Speech-Services`.
+
 ---
 
 Ein koversationsfähiger Sprachassistent würde wahrscheinlich den Rahmen einer Abschlussarbeit ordentlich spregen. Könnte aber in Anschluss zu einer guten vorangegangenen Abschlussarbeit ein sehr spannendes Thema für eine Masterarbeit werden.
