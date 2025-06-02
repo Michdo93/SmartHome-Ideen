@@ -150,17 +150,56 @@ Die Auswahl von verschiedenen Libraries kann ja Vor- und Nachteile hervorheben.
 
 ##### Hotword Detection
 
-| **Library** | **Pro**     | **Contra** |
-|-------------|-------------|------------|
-| `Porcupine` | * Python 3  | * Bedingt cloudbasiert (kann sein, dass man tatsächlich die Cloudanbindung nutzen muss). |
-|             | * kostenlos |            |
-| `Snowboy`   | * kostenlos | * Python 2 |
-|             | * lokal     | * Training eingestellt/nicht mehr verfügbar (zumindest mein Wissenstand, kann mich auch täuschen.) |
-| `Mycroft Precise` | * Python 3 (& Python 2) | |
-|                   | * kostenlos | |
-|                   | * lokal | |
-| `Picovoice` | * Python 3 | * cloudbasiert |
-|             | * kostenlos | * depracated (man soll stattdessen `Porcupine` verwenden. |
+###### ✅ Vergleich: **Lokale Hotword-Erkennungssysteme**
+
+| **Library / System** | **Sprache / API** | **Lokal** | **Cloudfrei**     | **Status**           | **Besonderheiten**                                      |
+| -------------------- | ----------------- | --------- | ----------------- | -------------------- | ------------------------------------------------------- |
+| 🔹 `Porcupine`       | Python 3 / C      | ✅         | ✅\*               | ✅ aktiv              | Sehr effizient, Wakeword-Modelle mit Lizenz generierbar |
+| 🔹 `Snowboy`         | Python 2 / C++    | ✅         | ⚠️ (für Training) | ❌ eingestellt (2020) | Exzellente Erkennung, kein Custom Training mehr         |
+| 🔹 `Mycroft Precise` | Python 3          | ✅         | ✅                 | ✅ aktiv (2024 Forks) | Open-Source, trainierbar mit eigenem Datensatz          |
+| 🔸 `Picovoice`       | Python 3 / Web    | ⚠️ teils  | ❌                 | ⚠️ deprecated        | Picovoice war Suite, nun nur noch Porcupine aktiv       |
+
+---
+
+###### 🧠 Klarstellungen:
+
+* **Porcupine** (by Picovoice):
+
+  * Sehr **effizient**, läuft sogar auf Mikrocontrollern.
+  * Man kann eigene Wakewords **lokal erzeugen**, aber dazu braucht man evtl. die **Picovoice Console** (Web).
+  * Die Laufzeit selbst ist **vollständig offline**.
+  * Lizenzmodell: Kostenlos für Einzelpersonen / nicht-kommerzielle Zwecke.
+
+* **Snowboy**:
+
+  * Früher sehr populär für lokale Wakeword-Erkennung.
+  * Leider **nicht mehr gepflegt**.
+  * Eigene Wakewords waren nur über eine Web-Oberfläche trainierbar, die inzwischen offline ist.
+
+* **Mycroft Precise**:
+
+  * **Open Source und lokal trainierbar** mit eigenem Datensatz.
+  * Python 3-kompatibel, kann auf Linux / Raspberry Pi laufen.
+  * Aktive Community / Forks, auch 2024 noch in Benutzung.
+  * Funktioniert gut für DIY- oder Datenschutzprojekte.
+
+* **Picovoice SDK**:
+
+  * Die **gesamte SDK-Suite (Speech-to-Text etc.)** wurde eingeschränkt, empfohlen wird jetzt direkt **Porcupine**.
+  * **Nicht mehr aktiv entwickelt** als Komplettpaket.
+
+---
+
+###### 📌 Fazit / Empfehlung:
+
+| Einsatzziel                              | Empfehlung                         |
+| ---------------------------------------- | ---------------------------------- |
+| Lokaler Assistent mit Custom Hotword     | 🔹 **Mycroft Precise**             |
+| Minimaler Stromverbrauch (z. B. Pi Zero) | 🔹 **Porcupine**                   |
+| Forschung / Training eigener Wakewords   | 🔹 **Mycroft Precise**             |
+| Veraltete Tools vermeiden                | ❌ Kein Snowboy, kein Picovoice SDK |
+
+---
 
 Dies ist jetzt nur eine kleine Übersicht, was man machen kann im Vergleich. Am besten Quellen ranziehen (z. B. Webseite, Doku, usw.). Man vergleicht am Besten `Python 3 / Python 2` (`Python 2` ist ein Ausschlusskriterium). In der auf NodeJS-basierenden Software `MagicMirror` wird für die Spracherkennung `Snowboy` eingesetzt. Dort ist als `Hotword` bereits `MagicMirror` vortrainiert. Ein neues Hotword kann nicht mehr trainiert werden, weil `Snowboy` deprecated ist und der Service für das Training meines Wissens sogar eingestellt wurde. Selbstverständlich schaut man sich an, ob etwas cloudbasiert funktioniert, lokal oder teilweise cloudbasiert ist. Ebenfalls wichtig ist ja, ob etwas kostenlos ist oder nicht. Hin und wieder gibt es ja auch Abomodelle, dass man vielleicht 1000 Requests kostenlos hat oder Centbeträge für einzelne Requests zahlt, usw. Manche Libraries nutzen `C`, `C++` im Background und es wird nur ein `Python-Wrapper` verwendet. Dies bedeutet, dass das Training performanter und hardwarenäher ist.
 
