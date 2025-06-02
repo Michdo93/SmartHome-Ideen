@@ -5,6 +5,7 @@
 ## Mögliche Titelvorschläge
 
 - "Entwicklung eines datenschutzfreundlichen Sprachassistenten auf Basis freier Software"
+- "Entwicklung eines datenschutzfreundlichen Sprachassistenten auf Basis von Open-Source-Software"
 - "Vergleich von ASR-Engines für Offline-Sprachassistenten"
 - "Modularer Sprachassistent für den lokalen Einsatz: Architektur und Prototyp"
 - "Sprachverarbeitung ohne Cloud: Konzeption und Evaluation eines lokalen Sprachassistenten"
