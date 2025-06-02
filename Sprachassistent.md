@@ -1553,6 +1553,40 @@ CONFIRM_LIGHT
 
 ---
 
+Es gibt Sprachassistenten, die **über reine Sprachbefehle hinausgehen** und tatsächlich **mehrstufige Konversationen** ermöglichen – ähnlich wie Chatbots. Allerdings ist das **eher die Ausnahme als die Regel**, besonders bei **lokalen oder Open-Source-Systemen**.
+
+Hier ist ein **vergleichender Überblick**, der zeigt, welche Sprachassistenten eher **befehlsgesteuert** agieren und welche eine **dialogorientierte Interaktion** (Konversation) ermöglichen:
+
+## 🧠 Vergleich: Sprachbefehl vs. Konversation bei Sprachassistenten
+
+| Sprachassistent                   | Typ                  | Befehlsgesteuert | Konversationsfähig | Konversationsspeicher   | Bemerkungen                                             |
+| --------------------------------- | -------------------- | ---------------- | ------------------ | ----------------------- | ------------------------------------------------------- |
+| **Amazon Alexa**                  | Cloud                | ✅ Ja             | ⚠️ Teilweise       | 🔁 Kontext begrenzt     | Nur mit aktivem Skill/Dialogmodell konversationsfähig   |
+| **Google Assistant**              | Cloud                | ✅ Ja             | ⚠️ Teilweise       | 🔁 Nur kurzzeitig       | Kontext wird oft nach Antwort gelöscht                  |
+| **Apple Siri**                    | Cloud                | ✅ Ja             | ❌ Nein             | ❌ Kein Kontext          | Sehr befehlsfokussiert                                  |
+| **Mycroft**                       | Open Source (lokal)  | ✅ Ja             | ⚠️ Möglich         | ⚠️ Entwicklerabhängig   | FSMs und dialog module möglich                          |
+| **Rhasspy**                       | Open Source (lokal)  | ✅ Ja             | ❌ Nein             | ❌ Kein interner Kontext | Fokus auf Einmal-Befehle                                |
+| **Jarvis.ai / ChatGPT + TTS/STT** | Hybrid (lokal/cloud) | ✅ Ja             | ✅ Ja               | ✅ Vollständig           | Nutzt z. B. Whisper + ChatGPT für Konversationsverläufe |
+| **Home Assistant Assist**         | Lokal/Cloud          | ✅ Ja             | ❌ (noch nicht)     | ❌ Kein Dialogspeicher   | Fokus auf Smarthome-Befehle                             |
+
+---
+
+### 🔍 Interpretation:
+
+* Die meisten Sprachassistenten (vor allem kommerzielle) sind auf **Einzelbefehle** optimiert.
+* **Echte Konversationen** wie bei einem Chatbot erfordern:
+
+  * **Kontextspeicherung** über mehrere Turns hinweg
+  * **Dialog-Management** (z. B. mit Zustandsautomaten oder Intenterkennung + Slot-Filling)
+  * ggf. **LLM-Unterstützung** (Large Language Models)
+* Systeme wie **ChatGPT + TTS/STT-Wrapper** oder eigene FSM-basierte Dialogsysteme bieten die **flexibelste Form echter Konversation**.
+
+---
+
+### 🧩 Fazit:
+
+> Sprachassistenten wie **Siri, Alexa, Rhasspy oder Mycroft** sind primär auf **sprachgesteuerte Einzelbefehle** ausgelegt. Für **kontextbasierte Gespräche** brauchst du entweder ein System wie **ChatGPT**, ein eigenes LLM-Backend – oder du erweiterst Open-Source-Lösungen wie **Mycroft** mit Dialogmanagementlogik.
+
 ## Bonustipp
 
 ### ASR/STT
