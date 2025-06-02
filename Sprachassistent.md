@@ -435,6 +435,85 @@ Empfehlung: In Python kann man die [fuzzywuzzy-Bibliothek](https://github.com/se
 
 ---
 
+#### 🧠 **Wird Fuzzy Matching für einen Sprachassistenten benötigt?**
+
+##### ✅ **Kurzantwort:**
+
+**Ja, in bestimmten Komponenten eines Sprachassistenten kann Fuzzy Matching nützlich sein – aber es ist nicht zwingend erforderlich** und wird **nicht immer eingesetzt**, insbesondere dann nicht, wenn du moderne NLU- oder KI-Modelle verwendest.
+
+---
+
+#### 📌 **Wann ist Fuzzy Matching sinnvoll?**
+
+Fuzzy Matching kommt dann zum Einsatz, wenn:
+
+* **Benutzereingaben ungenau, variabel oder fehlerhaft** sind (z. B. Tippfehler, unterschiedliche Formulierungen).
+* **Keine trainierten oder semantischen Modelle verfügbar** sind, etwa bei regelbasierten Assistenten.
+* Du **einfach strukturierte Sprachbefehle mit statischen Antworten** hast.
+
+##### Typische Einsatzszenarien:
+
+| Anwendung                                                   | Fuzzy Matching notwendig? | Alternative bei moderner Architektur          |
+| ----------------------------------------------------------- | ------------------------- | --------------------------------------------- |
+| Menüsysteme / Chatbots mit festen Befehlen                  | ✅ Ja                      | Regelbasierte Intenterkennung                 |
+| Sprachassistent mit NLU-Modell (z. B. Rasa)                 | ❌ Eher nein               | Verwendung von ML-basierten Parsers           |
+| Wakeword-Erkennung                                          | ❌ Nein                    | Hier nutzt man z. B. CNNs, kein Text-Matching |
+| Dateinamen oder Orte erkennen („Spiel *Bohemian Rhapsody*“) | ✅ Ja (optional)           | Levenshtein, Jaro-Winkler, etc.               |
+
+---
+
+#### 🔄 **Beispiel: Fuzzy Matching vs. NLU**
+
+##### Ohne NLU:
+
+```python
+if "spiel musik" in user_input:
+    do_music()
+elif "spiel musick" in user_input:  # Tippfehler!
+    do_music()  # geht nicht ohne Fuzzy Matching
+```
+
+##### Mit Fuzzy Matching:
+
+```python
+from fuzzywuzzy import fuzz
+if fuzz.partial_ratio("spiel musik", user_input) > 80:
+    do_music()
+```
+
+##### Mit NLU (z. B. Rasa):
+
+```yaml
+- intent: play_music
+  examples: |
+    - spiel musik
+    - spiel bitte musik
+    - spiele ein lied
+    - mach musik an
+```
+
+→ NLU erkennt die Absicht, auch wenn der Text variiert oder leicht fehlerhaft ist. Kein Fuzzy Matching nötig.
+
+---
+
+#### 🧩 **Fazit**
+
+| Wenn du ...                            | Dann ...                                      |
+| -------------------------------------- | --------------------------------------------- |
+| ... nur einfache Textvergleiche machst | Fuzzy Matching kann helfen                    |
+| ... moderne NLU-Modelle nutzt          | Fuzzy Matching ist **nicht nötig**            |
+| ... Intents regelbasiert zuweist       | Fuzzy Matching kann Fehler abfedern           |
+| ... mit Sprache (nicht Text) arbeitest | ASR-Fehler können durch NLU abgefangen werden |
+
+---
+
+#### 💡 Empfehlung für deine Bachelorarbeit:
+
+* **Nutze Fuzzy Matching nur bei Bedarf**, z. B. für regelbasierte Systeme oder spezifische Trigger (z. B. Namen, Ortslisten).
+* Bei **modernem Aufbau mit Rasa, transformers oder GPT-basierten Komponenten**: Verzichte darauf und verlasse dich auf semantische Modelle.
+
+Ich denke in einer gut ausgearbeiteten Abschlussarbeit erläutert man diesen Verzicht auch, weil es sehr viel darüber sagt, was in der Theorie ein System alles können muss.
+
 ### Intent, Entity, Confidence Score
 
 Aus:
@@ -663,5 +742,127 @@ Hier ist eine Übersicht:
 | Moderne TTS, lokale Nutzung, erweiterbar | **Coqui TTS**                      |
 | Einfache Integration, geringe Ressourcen | **pyttsx3** oder **eSpeak NG**     |
 | Vollständige SSML-Verarbeitung lokal     | **MaryTTS** oder Coqui (teilweise) |
+
+---
+
+## 📑 **Gliederungsvorschlag für die Bachelorarbeit**
+
+Hier ist ein **Vorschlag für die Gliederung deiner Bachelorarbeit**, passend zum Thema *„Entwicklung eines lokalen Sprachassistenten“*. Die Gliederung ist modular, logisch aufgebaut und erlaubt sowohl technische Tiefe als auch theoretische Reflexion.
+
+### 1. **Einleitung**
+
+* Motivation und Relevanz des Themas
+* Zielsetzung der Arbeit
+* Abgrenzung und Umfang
+* Aufbau der Arbeit
+
+---
+
+### 2. **Theoretische Grundlagen**
+
+* Sprachassistenten: Definition und Bestandteile
+* Überblick über aktuelle Systeme (Alexa, Siri, Mycroft, etc.)
+  * Vor- und Nachteile (Datenschutz, Cloudanbindung, keine Smart Home Integration wie bspw. openHAB, usw.)
+* Komponenten im Detail:
+
+  * Hotword Detection
+  * Automatic Speech Recognition (ASR)
+    * Erkläre ebenfalls am besten STT 
+  * Natural Language Understanding (NLU)
+    * Erkläre ebenfalls am besten NLP und warum NLU eine Teilmenge ist. 
+  * Text-to-Speech (TTS)
+* Datenschutz & Offline-Verarbeitung
+* Einordnung in bestehende Arbeiten (State of the Art)
+
+Was nicht schaden kann ist, wenn man hier noch KI-Grundlagen irgendwie erläutert und erklärt. Man hat ja verschiedene Berührungspunkte, weil man ja auch Modelle trainiert. Eventuell muss man ja auch Begriffe wie `Reinforcement Learning` beschreiben. Spracherkennungssysteme neigen meist zu `Übertraining` (`overfitting`), was wäre dies denn überhaupt erst? Da kann man mit theoretische Grundlagen sehr tief ins Thema einsteigen.
+
+---
+
+### 3. **Anforderungsanalyse**
+
+* Funktionale Anforderungen (z. B. Hotword, STT, NLU)
+* Nicht-funktionale Anforderungen (z. B. Offline-Betrieb, Modularität)
+* Zielplattform (z. B. Raspberry Pi vs. Mini-PC)
+* Auswahlkriterien für Frameworks und Komponenten
+* Smart Home Integration (z. B. openHAB)
+
+---
+
+### 4. **Konzept und Architektur**
+
+* Architekturentwurf des Sprachassistenten
+* Beschreibung der Systemkomponenten
+
+  * Audioaufnahme & Verarbeitung
+  * Modulinteraktion
+* Kommunikationsschnittstellen
+* Datenflussdiagramm
+
+---
+
+### 5. **Implementierung**
+
+* Projektstruktur & Technologie-Stack
+* Beschreibung der wichtigsten Module:
+
+  * Hotword-Erkennung (z. B. Porcupine)
+  * Spracherkennung (z. B. Whisper/Vosk)
+  * Intent-Erkennung (z. B. Rasa/Regex)
+  * Textausgabe (z. B. Coqui TTS)
+* Erweiterbarkeit & Custom Intents
+* Beispielabläufe / Interaktionen
+
+Ich sage hier nur vielleicht. Man sollte sich nicht zu stark an diesen Libraries orientieren.
+
+---
+
+### 6. **Evaluation**
+
+* Testmethodik (z. B. definierte Szenarien, Vergleich mit Cloudlösungen)
+* Messkriterien:
+
+  * Erkennungsrate
+  * Latenzzeit
+  * Ressourcenverbrauch
+* Vergleich von Alternativen (z. B. Whisper vs. Vosk)
+* Diskussion der Ergebnisse
+
+Eine Machbarkeitsstudie macht man ja so oder so allgemein. In Bezug auf "Machtbarkeit" kann man ja zeigen, ob ein ehemaliges Szenario von Alexa und openHAB sich nun mit dem neu entwickelten System umsetzen lässt. Wenn ja, dann hat man es ja geschafft ein "Konkurrenzprodukt" zu entwickeln, welches cloudunabhängig funktioniert, somit lokal ist, datenschutztechtlich unbedenklich, usw.
+
+---
+
+### 7. **Reflexion und Ausblick**
+
+* Bewertung der Zielerreichung
+* Technische und konzeptionelle Herausforderungen
+* Verbesserungspotenziale
+* Ausblick auf mögliche Erweiterungen (z. B. Dialogmanagement, IoT-Anbindung)
+
+Ich denke eins wird klar sein: Alexa nutzt bspw. verschiedene Skills. Mit diesen Skills lassen sich Apps, Anwendungen, Geräte von sehr vielen verschiedenen Anbietern integrieren. Auch, weil Skills communitybasiert oder durch Firmen/Organistationen entwickelt werden. Heißt viele Bedienmöglichkeiten und Szenarien über viele Skills/Anwendungen sind hier natürlich nicht integrierbar und am Ende nutzbar. Dies nimmt einen Nutzer auch eine gewisse Komfortabilität und einen gewissen Nutzen. Wären aber bspw. manche Skills umsetzbar oder müsste man die komplette Architektur des Prototypen umschreiben? Könnte man z. B. Geräte von Somfy, Philips Hue oder Sonos auch direkt anbinden oder geht dies nur über ein Smart Home System wie openHAB?
+
+---
+
+### 8. **Fazit**
+
+* Zusammenfassung der Arbeit
+* Wichtigste Erkenntnisse
+* Persönliche Bewertung
+
+---
+
+### 9. **Anhang**
+
+* Codeauszüge
+* Konfigurationsdateien
+* Screenshots / Ablaufdiagramme
+* Testprotokolle
+
+---
+
+### 10. **Literaturverzeichnis**
+
+* Fachliteratur
+* Dokumentationen verwendeter Tools
+* Onlinequellen mit Zugriffsdatum
 
 ---
