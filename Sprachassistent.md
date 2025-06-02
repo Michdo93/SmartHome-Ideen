@@ -475,3 +475,154 @@ Mit Entities kann man User:innen durch Chat Flows in Form von Buttons navigieren
 [4]: https://cloud.ibm.com/docs/assistant?topic=assistant-expression-language
 
 ---
+
+#### Speech Synthesis Markup Language (SSML)
+
+**SSML (Speech Synthesis Markup Language)** ist eine XML-basierte Auszeichnungssprache, mit der du **Text-to-Speech (TTS)**-Ausgaben präzise steuern kannst – also wie ein Sprachsynthesizer den gesprochenen Text betonen, pausieren oder variieren soll.
+
+---
+
+##### 🧠 Was kann man mit SSML machen?
+
+Mit SSML kannst du steuern:
+
+* 🗣 **Aussprache** (`<phoneme>`)
+* ⏸ **Pausen** (`<break>`)
+* 🎵 **Tonhöhe, Lautstärke, Sprechgeschwindigkeit** (`<prosody>`)
+* 📢 **Sprachstil / Emphasis** (`<emphasis>`, `<voice>`)
+* 🌍 **Sprache und Stimme** (`<lang>`, `<voice>`)
+* 🔁 **Audioeinspielung** (`<audio>` – je nach Engine)
+
+---
+
+##### ✅ Einfaches Beispiel
+
+```xml
+<speak>
+  Hallo! <break time="500ms"/> Wie kann ich dir helfen?
+</speak>
+```
+
+⏱ Fügt eine **halbe Sekunde Pause** ein.
+
+---
+
+##### 📌 Häufig genutzte SSML-Tags (Auswahl)
+
+| Tag          | Funktion                                | Beispiel                                              |
+| ------------ | --------------------------------------- | ----------------------------------------------------- |
+| `<speak>`    | Wurzel jeder SSML-Ausgabe               | `<speak>Text hier</speak>`                            |
+| `<break>`    | Fügt Pause ein                          | `<break time="300ms"/>`                               |
+| `<prosody>`  | Steuert Tonhöhe, Lautstärke, Tempo      | `<prosody pitch="+10%" rate="slow">...</prosody>`     |
+| `<emphasis>` | Betonung auf Wort/Satz                  | `<emphasis level="strong">wichtig</emphasis>`         |
+| `<phoneme>`  | Definiert Lautschrift                   | `<phoneme alphabet="ipa" ph="ˈhæloʊ">Hallo</phoneme>` |
+| `<lang>`     | Schaltet auf andere Sprache             | `<lang xml:lang="en-US">Hello!</lang>`                |
+| `<audio>`    | Spielt Audiodatei ab (nur in Cloud-TTS) | `<audio src="sound.mp3"/>`                            |
+
+---
+
+##### 🎙 Beispiel: Mehrsprachiger Text mit Betonung
+
+```xml
+<speak>
+  Willkommen bei deinem Sprachassistenten. <break time="300ms"/>
+  <emphasis level="strong">Heute</emphasis> ist ein schöner Tag.
+  <lang xml:lang="en-US">The weather is sunny and warm.</lang>
+</speak>
+```
+
+---
+
+##### ⚙️ Kompatibilität
+
+| TTS-Engine            | SSML-Unterstützung | Hinweis                               |
+| --------------------- | ------------------ | ------------------------------------- |
+| **Google TTS**        | ✅ Vollständig      | auch `<audio>`-Einbindung möglich     |
+| **Amazon Polly**      | ✅ Sehr gut         | unterstützt viele `<voice>`-Stile     |
+| **Coqui TTS**         | ⚠️ Teilweise       | `<break>`, `<prosody>` oft verfügbar  |
+| **eSpeak / Festival** | ❌ Kaum             | meist keine native SSML-Unterstützung |
+
+---
+
+##### 🛠 Tipps für die Praxis
+
+* SSML hilft, die **Natürlichkeit und Verständlichkeit** von Sprachausgaben zu steigern.
+* Nutze es gezielt bei langen Dialogen, Aufzählungen oder multilingualem Content.
+* Für lokale Assistenten mit z. B. `pyttsx3` ist SSML oft **nicht direkt nutzbar** – dort musst du ggf. Pausen und Tonhöhe manuell steuern.
+
+---
+
+Ja, **es gibt mehrere Text-to-Speech-Lösungen, die vollständig lokal arbeiten**, also **ohne Cloudverbindung** funktionieren. Das ist besonders wichtig für Datenschutz, Offlinefähigkeit und Embedding in Systeme wie deinen Sprachassistenten.
+
+---
+
+##### 🗣️ **Lokale TTS-Libraries – ohne Cloud**
+
+Hier ist eine Übersicht:
+
+| Library / Tool | Sprache | Lokal | Qualität | SSML-Unterstützung     | Bemerkung                              |
+| -------------- | ------- | ----- | -------- | ---------------------- | -------------------------------------- |
+| **Coqui TTS**  | Python  | ✅     | ⭐⭐⭐⭐☆    | Teilweise (SSML-light) | Moderne TTS, sehr anpassbar            |
+| **eSpeak NG**  | C/C++   | ✅     | ⭐⭐☆☆☆    | ❌                      | Extrem leichtgewichtig, viele Sprachen |
+| **Festival**   | C++     | ✅     | ⭐⭐☆☆☆    | ❌                      | Veraltet, aber stabil                  |
+| **RHVoice**    | C++     | ✅     | ⭐⭐⭐☆☆    | ❌                      | Gute Qualität, Open Source             |
+| **pyttsx3**    | Python  | ✅     | ⭐⭐☆☆☆    | ❌                      | Wrapper um native Engines              |
+| **MaryTTS**    | Java    | ✅     | ⭐⭐⭐☆☆    | ✅                      | Alte, aber robuste Plattform mit SSML  |
+| **OpenTTS**    | Docker  | ✅     | ⭐⭐⭐⭐☆    | Ja (je nach Backend)   | Aggregiert Coqui, MaryTTS, etc.        |
+
+---
+
+##### 🔍 Kurze Details zu den wichtigsten:
+
+###### 🔸 **Coqui TTS**
+
+* Modernes, Deep-Learning-basiertes System (Fork von Mozilla TTS)
+* Offline trainierbar oder fertige Modelle nutzbar
+* CLI & Python API
+* Stimmen für viele Sprachen, inkl. Deutsch
+* Eingeschränkte SSML-ähnliche Features (`<break>`, `rate`, `pitch` per CLI/Args)
+
+👉 Empfohlen für dein Projekt, wenn du **Qualität + Lokalität** brauchst
+
+---
+
+###### 🔸 **eSpeak NG**
+
+* Extrem leicht (\~2MB)
+* Unterstützt 100+ Sprachen, aber Robot-ähnliche Stimme
+* Ideal für embedded / low-resource-Systeme
+
+👉 Für Prototypen oder Systeme mit **minimaler Leistung**
+
+---
+
+###### 🔸 **pyttsx3**
+
+* Python-Wrapper um native TTS-Engines (Windows: SAPI5, macOS: NSSpeechSynthesizer, Linux: espeak)
+* Einfach zu benutzen, aber begrenzte Kontrolle über Stimme und Stil
+* Keine SSML-Unterstützung, nur rudimentäres Timing
+
+👉 Gut für **schnelle Demos** oder klassische Desktop-Sprachsynthese
+
+---
+
+###### 🔸 **MaryTTS**
+
+* Java-basiert, mit Webserver & REST-API
+* Unterstützt echtes SSML
+* Deutsche Stimme enthalten
+* Längere Startzeit, komplexer Aufbau
+
+👉 Für **akademische oder stabile serverseitige Anwendungen**
+
+---
+
+##### ✅ Empfehlung für Bachelorarbeit
+
+| Ziel                                     | Empfehlung                         |
+| ---------------------------------------- | ---------------------------------- |
+| Moderne TTS, lokale Nutzung, erweiterbar | **Coqui TTS**                      |
+| Einfache Integration, geringe Ressourcen | **pyttsx3** oder **eSpeak NG**     |
+| Vollständige SSML-Verarbeitung lokal     | **MaryTTS** oder Coqui (teilweise) |
+
+---
