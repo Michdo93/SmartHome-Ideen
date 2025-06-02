@@ -1553,11 +1553,11 @@ CONFIRM_LIGHT
 
 ---
 
+## 🧠 Vergleich: Sprachbefehl vs. Konversation bei Sprachassistenten
+
 Es gibt Sprachassistenten, die **über reine Sprachbefehle hinausgehen** und tatsächlich **mehrstufige Konversationen** ermöglichen – ähnlich wie Chatbots. Allerdings ist das **eher die Ausnahme als die Regel**, besonders bei **lokalen oder Open-Source-Systemen**.
 
 Hier ist ein **vergleichender Überblick**, der zeigt, welche Sprachassistenten eher **befehlsgesteuert** agieren und welche eine **dialogorientierte Interaktion** (Konversation) ermöglichen:
-
-## 🧠 Vergleich: Sprachbefehl vs. Konversation bei Sprachassistenten
 
 | Sprachassistent                   | Typ                  | Befehlsgesteuert | Konversationsfähig | Konversationsspeicher   | Bemerkungen                                             |
 | --------------------------------- | -------------------- | ---------------- | ------------------ | ----------------------- | ------------------------------------------------------- |
