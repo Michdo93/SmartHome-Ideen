@@ -26,6 +26,7 @@ Sprachassistenten wie Alexa, Siri oder Google Assistant haben sich im Alltag vie
   - Ein lokaler Sprachassistent würde zumindest lokal funktionierende Befehle bearbeiten und lokal verfügbare Informationen zur Verfügung stellen können.
 - Datenschutzrechtlich hört ein Sprachassistent dauerhaft mit und wartet, bis ein sog. Hotword (auch trigger word oder wake word) erkannt wird.
   - Ist wirklich garantiert, dass nur Daten aufgezeichnet und an eine Cloud gesendet werden, wenn ein Hotword verwendet wurde oder lauscht das System dauerhaft mit?
+    - Rein theoretisch könnte man über Wireshark prüfen, ob ein Sprachassistent wie bspw. Alexa nicht ständig mit ihrer Cloud kommunziert. Die Annahme wäre natürlich sehr groß, dass wenn dauerhaft kommuniziert wird, dass Amazon abhört und lauscht, nicht nur nach einem Hotword aktiv Daten aufzeichnet.
   - Anmerkung: Deutsche Begriffe sind Aktivierungswort, Aufwachwort, Aufwachbefel, Triggerwort, usw.
 - Sprachassistenten sind oft nur beschränkt individualisierbar, Anwendungen werden eingestellt oder eingeschränkt.
   - Google Nest ermöglicht es oft bspw. Smart Home Geräte zwar anzubinden, diese können darüber aber nicht gesteuert werden, sondern meist nur Zustände abgefragt werden.
@@ -107,6 +108,53 @@ Ziel der Arbeit ist die Entwicklung und prototypische Umsetzung eines lokalen Sp
 ## Beispielaufbau & Vorgehensweise
 
 Ein eigener Sprachassistent ist ein spannendes Projekt – technisch anspruchsvoll, aber mit vielen Freiheiten in der Gestaltung. Unten findest du eine systematische Übersicht über alle benötigten **Komponenten**: Hardware, Software, KI-Module und die empfohlene Toolchain.
+
+---
+
+## Mögliche Fragen
+
+- Sind Ressourcen für einen lokalen Sprachassistenz leistungsstark genug? (Last)
+- Wie lange dauert es eine Antwort zu generieren? (Latenz)
+- Wie präzise können Worte/Sätze erkannt werden? (Genauigkeit)
+- Gibt es genügend kostenlose und lokale Frameworks und Libraries für die einzelnen Module eines Sprachassistenten (angenommen STT läuft lokal, bedeutet dies nicht, dass TTS auch lokal funktionieren könnte)?
+- Wie häufig muss trainiert werden? Wird im laufenden Einsatz des Systems trainiert (z. B. `Reinforcement Learning`)?
+- Was muss trainiert werden?
+- Wie muss trainiert werden? (Zum Beispiel `online` vs. `offline`).
+- Wie werden Trigger hinzugefügt?
+- Wie kann ein Trigger zu einer Ausführung gelangen? (Zum Beispiel einen regelbasierten Ansatz verwenden).
+- Benötige ich eine Hotword-Recognition?
+  - Dies würde ich auch definitiv mit ja beantworten. Selbst wenn dieses System nicht datenschutzrechtlich bedenklich ist, sollte das System nicht dauerhaft zuhören. Hört dieses System dauerhaft zu, muss eine oder mehrere KIs die ganze Zeit analysieren, was das System ziemlich sicher überlasten würde.
+- Wie lange darf eine Spracheingabe dauern?
+  - Vielleicht machen 90-120 Sekunden als maximal Sinn, weil wenn ich zu viel rede, ist man einfach nicht präzise genug. Eine KI würde nicht mehr verstehen, worauf man hinaus will. Wenn man einen regelbasierten Ansatz hat, könnten aber z. B. 120 Sekunden schon viel zu lange sein, weil man dann in 120 Sekunden ja Wort für Wort denselben Satz sagen muss, wie der, der durch einen Trigger ausgelöst werden soll. Hier wäre dann je länger ein Satz ist, es umso schwieriger, dass nach Abzug von Fehlern der richtige Satz noch erkannt wird.
+- Braucht eine Spracheingabe eine minimale Dauer?
+  - Vielleicht macht es Sinn, dass man mindestens 15-20 Sekunden etwas sagen sollte, ansonsten wird dies verworfen, weil zu wenige Informationen vorhanden wären, als dass man damit etwas anfangen könnte. 
+- Brauche ich Abbruchkritierien?
+  - Abbruchkriterien könnten Worte wie "Stop" oder "Halt" sein. Eventuell gekoppelt, dass man vorher erneut das Hotword sagen muss.
+  - Ein Abbruchkriterium ist natürlich, dass es keinen Triggersatz gibt.
+  - Weitere Abbruchkriterien sind, dass wenn eine KI analysiert oder eine Websuche gemacht wird, die eine Antwort liefert, dass dies eine Zeitüberschreitung darstellt. Ich denke niemand wartet 5-6 Minuten auf eine Antwort. Wäre hier also ebenfalls vielleicht 90-120 Sekunden sinnvoll für eine Zeitüberschreitung als Abbruchkriterium? Eine andere Zeitspanne?
+- Sind Abbruchkritieren wie Worte auch eigene Hortwords oder Triggersätze?
+- Wie lange muss ich Satzpausen zwischen Hotword und Triggerwort einplanen?
+- Welche Hotwords eignen sich? Zum Beispiel Smart Home.
+- Brauche ich mehrere Hotwords? Wenn ja, wie viele?
+  - Ich würde sagen, mehr als 3-4 würden wenig Sinn ergeben. Wenn man aber bspw. Smart Home und openHAB verwendet, kann man individueller seinen Sprachassistenten ansprechen. 
+- Muss ich Hotwords selbst wählen und damit verbunden dann neu trainieren können?
+  - Ja, weil man einen individuellen Sprachassistenten nicht zwangsläufig im Smart Home verwenden will, dann wäre Smart Home möglicherweise das falsche Hotword.
+  - Ja, weil man vielleicht wenn man openHAB verwendet openHAB als Hotword verwenden will oder wenn man Home Assistant oder ioBroker, usw. verwendet, diese Eigennamen als Hotword verwenden will.
+-  Welche Libraries eignen sich?
+-  Welche Frameworks eignen sich?
+-  Ist die Sprachqualität von offline Libraries überhaupt zumutbar?
+-  Wie füge ich Triggersätze hinzu?
+-  Wie füge ich Regeln hinzu? (`WENN-DANN`-Regel sind denke ich für einen Teil der Anwendungsszenarieren definitiv notwendig).
+-  Wie füge ich Funktionalitäten hinzu, die durch Trigger ausgeführt werden sollen.
+-  Welche Funktionalitäten sollen denn ausgeführt werden können?
+  - Zum Beispiel openHAB-Anbindung.
+  - Zum Beispiel Wecker/Timer setzen.
+  - Zum Beispiel Terminerinnerung setzen und an Termine erinnert werden.
+- Müssen Mehrsprachigkeit berücksichtigt werden? (Nein, da es ein Prototyp ist. Man müsste sonst viel zu viel trainieren).
+- Brauche ich eine REST API? Ja.
+- Brauche ich eine Weboberfläche? Ja.
+- Brauche ich eine Datenbank? Ja.
+- ...
 
 ---
 
