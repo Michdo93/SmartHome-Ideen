@@ -1497,9 +1497,7 @@ Diese Datei kannst du mit einem simplen YAML-Interpreter oder selbstgeschriebene
 
 ---
 
-Natürlich! Hier ist ein **Minimaler Konversationsbaum** als **einfache textbasierte Baumstruktur** (Diagramm-artig). Dieser stellt denselben Dialogfluss wie im YAML-Beispiel dar – aber in **grafischer Baumform**, wie du ihn dir konzeptionell vorstellen würdest.
-
----
+Hier ist ein **Minimaler Konversationsbaum** als **einfache textbasierte Baumstruktur** (Diagramm-artig). Dieser stellt denselben Dialogfluss wie im YAML-Beispiel dar – aber in **grafischer Baumform**, wie du ihn dir konzeptionell vorstellen würdest.
 
 ##### Beispiel: Minimaler Konversationsbaum – Baumstruktur (Dialoglogik)
 
@@ -1552,6 +1550,22 @@ CONFIRM_LIGHT
 * Füge z. B. weitere Intents wie „Temperatur ändern“, „Musik spielen“, etc. ein
 * Baue Zustände für Unsicherheiten oder Wiederholungen ein
 * Integriere Slot-Filling (z. B. Raum, Helligkeit, Uhrzeit)
+
+---
+
+## Bonustipp
+
+### ASR/STT
+
+Um verbal ASR oder STT richtig zu beschreiben, empfiehlt es sich Worte wie "dekodieren" und "konvertieren" zu verwenden, weil es somit einfach technischer beschrieben ist:
+
+> Automatic Speech Recognition (ASR) bzw. Speech-to-Text (STT) ist eine Kombination von Prozessen und Software, welches menschliche Sprache dekodiert und es in einen digitalen Text konvertiert.
+
+### TTS
+
+Um Verbal TTS zu beschreiben empfiehlt es sich ebenfalls Worte wie "kodieren" und "konvertieren" zu verwenden:
+
+> Text-to-Speech ist eine Kombination von Prozessen und Software, die einen digitalen Text in synthetische menschliche Sprache kodiert und konvertiert.
 
 ---
 
