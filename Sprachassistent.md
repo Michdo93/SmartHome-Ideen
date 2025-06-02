@@ -1400,4 +1400,159 @@ Ein konversationsfähiger Sprachassistent ist:
 
 ---
 
+#### Beispiel: Dialog-Engine mit Zustandsübergängen (FSM)
+
+Diese Beispiel-Engine in Python simuliert einen **zustandsbasierten Sprachdialog** (Finite-State-Machine):
+
+### 📁 `dialog_engine.py`
+
+```python
+class DialogEngine:
+    def __init__(self):
+        self.state = "START"
+
+    def handle_input(self, user_input):
+        if self.state == "START":
+            if "hallo" in user_input.lower():
+                self.state = "GREETING"
+                return "Hallo! Wie kann ich dir helfen?"
+            return "Bitte beginne mit einer Begrüßung."
+
+        elif self.state == "GREETING":
+            if "licht" in user_input.lower():
+                self.state = "LIGHT_CONFIRM"
+                return "Möchtest du das Licht einschalten?"
+            return "Das habe ich nicht verstanden. Möchtest du das Licht einschalten?"
+
+        elif self.state == "LIGHT_CONFIRM":
+            if user_input.lower() in ["ja", "ja bitte"]:
+                self.state = "END"
+                return "Licht wird eingeschaltet. Noch etwas?"
+            else:
+                self.state = "END"
+                return "Okay, kein Licht. Noch etwas?"
+
+        elif self.state == "END":
+            if "nein" in user_input.lower():
+                self.state = "START"
+                return "Okay, bis zum nächsten Mal!"
+            else:
+                self.state = "GREETING"
+                return "Womit kann ich dir sonst helfen?"
+
+# --- Demo-Nutzung ---
+if __name__ == "__main__":
+    engine = DialogEngine()
+    while True:
+        user = input("Du: ")
+        reply = engine.handle_input(user)
+        print("Assistent:", reply)
+```
+
+Hier wird ziemlich deutlich, dass die Varianz nicht groß ist. Je größer die Varianz, desto mehr if-Verzweigungen bzw. Verschachtelungen benötigt man. Je mehr Ebenen das Gespräch hat, desto komplizierter wird das Ganze und man muss deutlich mehr Sonderfälle berücksichtigen.
+
+---
+
+#### Beispiel: Minimaler Konversationsbaum in YAML (z. B. für Rasa)
+
+Das folgende YAML definiert einen **einfachen Dialog** in einer Struktur, wie Rasa oder ein FSM-Parser sie nutzen könnte:
+
+##### 📄 `dialogs.yaml`
+
+```yaml
+version: "1.0"
+dialogs:
+  - state: start
+    input: "hallo"
+    next: greeting
+    response: "Hallo! Wie kann ich dir helfen?"
+
+  - state: greeting
+    input: "ich will das licht einschalten"
+    next: confirm_light
+    response: "Möchtest du das Licht jetzt einschalten?"
+
+  - state: confirm_light
+    input: "ja"
+    next: light_on
+    response: "Okay, das Licht wird eingeschaltet."
+
+  - state: confirm_light
+    input: "nein"
+    next: end
+    response: "Alles klar, kein Licht."
+
+  - state: light_on
+    input: "*"
+    next: end
+    response: "Kann ich sonst noch etwas für dich tun?"
+
+  - state: end
+    input: "nein"
+    next: start
+    response: "Bis später!"
+```
+
+Diese Datei kannst du mit einem simplen YAML-Interpreter oder selbstgeschriebenem FSM-Parser nutzen. Die `*`-Eingabe dient als Platzhalter für „alles andere“.
+
+---
+
+Natürlich! Hier ist ein **Minimaler Konversationsbaum** als **einfache textbasierte Baumstruktur** (Diagramm-artig). Dieser stellt denselben Dialogfluss wie im YAML-Beispiel dar – aber in **grafischer Baumform**, wie du ihn dir konzeptionell vorstellen würdest.
+
+---
+
+##### Beispiel: Minimaler Konversationsbaum – Baumstruktur (Dialoglogik)
+
+```
+START
+ └── "hallo"
+     ↓
+GREETING
+ └── "ich will das licht einschalten"
+     ↓
+CONFIRM_LIGHT
+ ├── "ja"
+ │    ↓
+ │  LIGHT_ON
+ │    └── "*"
+ │         ↓
+ │       END
+ │         └── "nein" → START
+ │
+ └── "nein"
+      ↓
+    END
+      └── "nein" → START
+```
+
+---
+
+##### 📖 Erklärung der Zustände:
+
+* **START**
+  → Einstiegspunkt, wartet auf Begrüßung („hallo“)
+
+* **GREETING**
+  → Fragt: Was möchtest du tun? Erkennt: „Ich will das Licht einschalten“
+
+* **CONFIRM\_LIGHT**
+  → Fragt zur Sicherheit: „Möchtest du das Licht jetzt einschalten?“
+
+* **LIGHT\_ON**
+  → Antwort: „Okay, Licht wird eingeschaltet.“
+  → Danach optionale Rückfrage: „Noch etwas?“
+
+* **END**
+  → Beendet Gespräch, Möglichkeit zum Neustart (z. B. bei „nein“)
+
+---
+
+##### 🧩 Erweiterungsmöglichkeiten:
+
+* Füge z. B. weitere Intents wie „Temperatur ändern“, „Musik spielen“, etc. ein
+* Baue Zustände für Unsicherheiten oder Wiederholungen ein
+* Integriere Slot-Filling (z. B. Raum, Helligkeit, Uhrzeit)
+
+---
+
 Ein koversationsfähiger Sprachassistent würde wahrscheinlich den Rahmen einer Abschlussarbeit ordentlich spregen. Könnte aber in Anschluss zu einer guten vorangegangenen Abschlussarbeit ein sehr spannendes Thema für eine Masterarbeit werden.
