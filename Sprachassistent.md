@@ -645,6 +645,8 @@ Mit SSML kannst du steuern:
 | `<lang>`     | Schaltet auf andere Sprache             | `<lang xml:lang="en-US">Hello!</lang>`                |
 | `<audio>`    | Spielt Audiodatei ab (nur in Cloud-TTS) | `<audio src="sound.mp3"/>`                            |
 
+Anmerkung: Gute Entwickler können auch Mechanismen entwickeln, wie man solche SSML-Tags selbst in Libraries umsetzt, die dies nicht von sich aus unterstützen. Sätze müssen dann dann unter Umständen aufgeteilt werden, mehrere Audiodateien erstellt und am Ende zusammengefügt werden. Dies wäre aber durchaus ein extrem komplexes und durchaus nicht sicheres und instabiles Prozedere.
+
 ---
 
 ##### 🎙 Beispiel: Mehrsprachiger Text mit Betonung
