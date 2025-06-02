@@ -269,7 +269,7 @@ Selbstverständlich kommt hier auch wieder `Python 2` vs. `Python 3` vor, wenn m
 
 Ich denke dies kann man mehrschichtig aufbauen. Als erstes nutzt man z. B. die regelbasierten Antworten, wenn dort keine Regel auftaucht können Websuche oder KIs angebunden sein, usw. Hier kann man auch Vor- und Nachteile diskutieren. Eine eigene KI zu trainieren edeutet, dass man sehr vielseitig trainieren müsste und immens viele Daten bräuchte. Ein `GPT` (`Generative Pre-trained Transformer`) bedeutet ja in der Regel immer eine Cloud-Lösung (es gibt auch Docker-Container, die man lokal laufen lassen und trainieren kann).
 
-### Speech-to-Text
+##### Speech-to-Text
 
 Nicht selten sind es auch dieselben Cloud-Dienstleister, wie bei `Text-to-Speech`. Ich behaupte, es sind auch sehr vegleichbare und ähnliche Kriterien, sowie dieselben Vor- und Nachteile.
 
