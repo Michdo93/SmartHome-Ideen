@@ -144,6 +144,46 @@ Die Sprachassistenz umfasst mehrere Stufen:
 
 Neben der Sprachassistenz benötigt man meiner Meinung nach `Flask` für die `REST API` und für eine `Weboberfläche` des Sprachassistenzen. Wahrscheinlich konfiguriert man über die Weboberfläche Triggersätze. Entsprechend wird auch eine Datenbank (`SQLite` mit `SQLAlchemy`-Anbindung) für Passwörter und Regeln benötigt.
 
+#### Beispielvergleich
+
+Die Auswahl von verschiedenen Libraries kann ja Vor- und Nachteile hervorheben.
+
+##### Hotword Detection
+
+| **Library** | **Pro**     | **Contra** |
+|-------------|-------------|------------|
+| `Porcupine` | * Python 3  | * Bedingt cloudbasiert (kann sein, dass man tatsächlich die Cloudanbindung nutzen muss). |
+|             | * kostenlos |            |
+| `Snowboy`   | * kostenlos | * Python 2 |
+|             | * lokal     | * Training eingestellt/nicht mehr verfügbar (zumindest mein Wissenstand, kann mich auch täuschen.) |
+| `Mycroft Precise` | * Python 3 (& Python 2) | |
+|                   | * kostenlos | |
+|                   | * lokal | |
+| `Picovoice` | * Python 3 | * cloudbasiert |
+|             | * kostenlos | * depracated (man soll stattdessen `Porcupine` verwenden. |
+
+Dies ist jetzt nur eine kleine Übersicht, was man machen kann im Vergleich. Am besten Quellen ranziehen (z. B. Webseite, Doku, usw.). Man vergleicht am Besten `Python 3 / Python 2` (`Python 2` ist ein Ausschlusskriterium). In der auf NodeJS-basierenden Software `MagicMirror` wird für die Spracherkennung `Snowboy` eingesetzt. Dort ist als `Hotword` bereits `MagicMirror` vortrainiert. Ein neues Hotword kann nicht mehr trainiert werden, weil `Snowboy` deprecated ist und der Service für das Training meines Wissens sogar eingestellt wurde. Selbstverständlich schaut man sich an, ob etwas cloudbasiert funktioniert, lokal oder teilweise cloudbasiert ist. Ebenfalls wichtig ist ja, ob etwas kostenlos ist oder nicht. Hin und wieder gibt es ja auch Abomodelle, dass man vielleicht 1000 Requests kostenlos hat oder Centbeträge für einzelne Requests zahlt, usw. Manche Libraries nutzen `C`, `C++` im Background und es wird nur ein `Python-Wrapper` verwendet. Dies bedeutet, dass das Training performanter und hardwarenäher ist.
+
+##### ASR/TTS
+
+Es gibt extrem viele Libraries für `Text-to-Speech`. Die meisten benötigen eine Cloud. Also wirklich fast alle. Dies ist ein klarer Nachteil. Manche sind immer noch auf Basis von `Python 2`. Einige unterstützen sowohl `Python 2`, als auch `Python 3`. Manche gehen natürlich nur mit `Python 3`. Ergo kann man auch hier alles was `Python 3` nutzt als Vorteil ansehen. Das Ergebnis, bzw. die Sprachqualität von cloudbasierten Libraries ist ganz klar besser. Die lokal laufenden Systeme klingen im Deutschen so, als würde ein Amerikaner Deutsch reden und dann klingt es sehr technisch, mechanisch nach einem Roboter, während cloudbasierte Ergebnisse meist einem menschlichen Sprecher sehr nahe kommt. Je nachdem dauert die Umwandlung lange. Bei cloudbasierten Lösungen gibt es welche, die sehr schnell gute Ergebnisse zurückliefern. Cloudbasiert und damit viel Rechenleistung bedeutet aber tatsächlich nicht zwangsläufig, dass es schnell geht, bis die Datei generiert wird. Auch hier gibt es möglicherweise Latzenzen. Lokal laufende Lösungen haben zwar keine Latzen zwecks Netzwerkauslastung oder schlechter Internetverbindung, sind aber oft auch langsam, weil die Rechenkapazität geringer ist, als in einer Cloud. Man kann vergleichen, welche Datenformate generiert werden (`wav`, `mp3`, usw.). Ich denke für die meisten Szenarien ist es egal, welches Audioformat generiert wird. Wenn man aber bspw. Sonos-Lautsprecher verwenden möchte, dann kann es sein, dass nicht jedes Audioformat unterstütz wird. Vor- und Nachteile in der Bewertung kann es sein, ob Sprecherstimmen (verschiedene Frauen- oder Männerstimmen) konfigurierbar sind, ob Sprachen konfigurierbar sind oder ob `Speech Synthesis Markup Language` (`SSML`) unterstützt wird. `SSML` ist ein ganz klarer Vorteil und gerade im Vergleich zu `Amazon Alexa`, wäre es vielleicht sogar sehr sinnvoll, da `Alexa` dies unterstützt. 
+
+Es können auch weitere Kritieren noch für einen Vergleich herangezogen werden.
+
+Anmerkung: Es gibt verschiedene Libraries, die im Hintergrund aber bspw. denselben Service wie `Google STT` verwenden. Das heißt, viele Libraries stellen zu manch einer Library kaum eine echte Alternative dar.
+
+##### NLP
+
+Selbstverständlich kommt hier auch wieder `Python 2` vs. `Python 3` vor, wenn man die Libraries vergleicht. Da es hier um KI geht, ist auch entscheidend, ob `CPU` oder `GPU` verwendet werden kann. Gemessen an der schwachen Leistung des Endgeräts (z. B. Raspberry Pi), würde es hier auch Sinn ergeben, ob man eine `TPU`-Unterstützung oder andere Coprozessoren verwenden könnte. Es gibt auch KIs, die über eine Cloud trainiert werden. Bei manchen KIs, in einer Cloud lädt man Daten hoch, trainiert sie, lädt Daten herunter und kann die trainierten Daten zu seiner Anwendung hinzufügen. Dies wäre dann zumindest bedingt offline und lokalfähig, weil man nur beim Training eine Internetverbindung zwingend benötigt hat. Es gibt KIs, die sind leichtgewichtig und besonders gut für `Raspberry Pi's` geeignet.
+
+##### Antwortgenerierung
+
+Ich denke dies kann man mehrschichtig aufbauen. Als erstes nutzt man z. B. die regelbasierten Antworten, wenn dort keine Regel auftaucht können Websuche oder KIs angebunden sein, usw. Hier kann man auch Vor- und Nachteile diskutieren. Eine eigene KI zu trainieren edeutet, dass man sehr vielseitig trainieren müsste und immens viele Daten bräuchte. Ein `GPT` (`Generative Pre-trained Transformer`) bedeutet ja in der Regel immer eine Cloud-Lösung (es gibt auch Docker-Container, die man lokal laufen lassen und trainieren kann).
+
+### Speech-to-Text
+
+Nicht selten sind es auch dieselben Cloud-Dienstleister, wie bei `Text-to-Speech`. Ich behaupte, es sind auch sehr vegleichbare und ähnliche Kriterien, sowie dieselben Vor- und Nachteile.
+
 ---
 
 ### 🧠 **3. KI-Modelle: Wofür und wie trainieren?**
