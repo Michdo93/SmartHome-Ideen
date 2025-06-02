@@ -154,6 +154,7 @@ Ein eigener Sprachassistent ist ein spannendes Projekt – technisch anspruchsvo
 - Brauche ich eine REST API? Ja.
 - Brauche ich eine Weboberfläche? Ja.
 - Brauche ich eine Datenbank? Ja.
+- Wie teste ich das System bzw. welche Tests kann ich machen und planen?
 - ...
 
 ---
