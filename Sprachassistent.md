@@ -1,5 +1,71 @@
 # Bachelorarbeit: Entwicklung eines modularen, datenschutzfreundlichen und lokalen Sprachassistenten
 
+| | |
+| --- | --- |
+| **Art** | Bachelorarbeit (Erweiterung zur Masterarbeit denkbar) |
+| **Schwerpunkte** | Sprachverarbeitung (Wakeword, STT, NLU, TTS), Embedded Systems, Datenschutz, REST |
+| **Verwandte Ideen** | [Chatbot](Chatbot%20f%C3%BCr%20openHAB.md) – gleiche zentrale API, Text statt Sprache |
+
+<!-- TOC -->
+## Inhaltsverzeichnis
+
+- [Mögliche Titelvorschläge](#mögliche-titelvorschläge)
+- [Hintergrund](#hintergrund)
+  - [Problemstellung im Detail](#problemstellung-im-detail)
+- [Ziel der Arbeit](#ziel-der-arbeit)
+- [Teilziele](#teilziele)
+- [Mögliche Forschungsschwerpunkte](#mögliche-forschungsschwerpunkte)
+- [Abgrenzung: openHAB bringt eigene Sprachdienste mit](#abgrenzung-openhab-bringt-eigene-sprachdienste-mit)
+- [Eingesetzte Technologien (Auswahl)](#eingesetzte-technologien-auswahl)
+- [Voraussetzungen](#voraussetzungen)
+- [Betreuung & Rahmen](#betreuung--rahmen)
+- [Beispielaufbau & Vorgehensweise](#beispielaufbau--vorgehensweise)
+- [Mögliche Fragen](#mögliche-fragen)
+  - [🔧 1. Hardware](#-1-hardware)
+  - [🧠 2. Software-Komponenten & Architektur](#-2-software-komponenten--architektur)
+  - [🧠 3. KI-Modelle: Wofür und wie trainieren?](#-3-ki-modelle-wofür-und-wie-trainieren)
+  - [💻 4. Entwicklungsumgebung](#-4-entwicklungsumgebung)
+  - [🧱 5. Architekturübersicht (Ablauf)](#-5-architekturübersicht-ablauf)
+  - [🧪 6. Zusätzliche Tipps](#-6-zusätzliche-tipps)
+  - [🚀 Einstiegsvorschlag (für Prototypen)](#-einstiegsvorschlag-für-prototypen)
+- [Hintergrundwissen](#hintergrundwissen)
+  - [Unterschied Chatbot vs. Sprachassistent](#unterschied-chatbot-vs-sprachassistent)
+  - [Fuzzy Matching](#fuzzy-matching)
+  - [Intent, Entity, Confidence Score](#intent-entity-confidence-score)
+- [📑 Gliederungsvorschlag für die Bachelorarbeit](#-gliederungsvorschlag-für-die-bachelorarbeit)
+  - [1. Einleitung](#1-einleitung)
+  - [2. Theoretische Grundlagen](#2-theoretische-grundlagen)
+  - [3. Anforderungsanalyse](#3-anforderungsanalyse)
+  - [4. Konzept und Architektur](#4-konzept-und-architektur)
+  - [5. Implementierung](#5-implementierung)
+  - [6. Evaluation](#6-evaluation)
+  - [7. Reflexion und Ausblick](#7-reflexion-und-ausblick)
+  - [8. Fazit](#8-fazit)
+  - [9. Anhang](#9-anhang)
+  - [10. Literaturverzeichnis](#10-literaturverzeichnis)
+- [Beispielprojekt](#beispielprojekt)
+  - [📁 Projekt-Setup: voice_assistant/](#-projekt-setup-voice_assistant)
+  - [🧠 Komponentenüberblick mit Mini-Codebeispielen](#-komponentenüberblick-mit-mini-codebeispielen)
+  - [📦 requirements.txt](#-requirementstxt)
+  - [🛠️ Was du jetzt damit machen kannst](#️-was-du-jetzt-damit-machen-kannst)
+  - [🧠 Weitere Überlegungen für die Systemplanung](#-weitere-überlegungen-für-die-systemplanung)
+  - [🧩 Integration in bestehende Systeme](#-integration-in-bestehende-systeme)
+  - [🛠️ Entwicklung und Wartung](#️-entwicklung-und-wartung)
+  - [📚 Weiterführende Ressourcen](#-weiterführende-ressourcen)
+- [Sprachbefehl vs. Konversation](#sprachbefehl-vs-konversation)
+  - [🧠 Theoretischer Durchlauf: Sprachbefehl statt Konversation](#-theoretischer-durchlauf-sprachbefehl-statt-konversation)
+  - [🧠 Ziel: Konversationsfähiger Sprachassistent](#-ziel-konversationsfähiger-sprachassistent)
+  - [📁 dialog_engine.py](#-dialog_enginepy)
+- [🧠 Vergleich: Sprachbefehl vs. Konversation bei Sprachassistenten](#-vergleich-sprachbefehl-vs-konversation-bei-sprachassistenten)
+  - [🔍 Interpretation:](#-interpretation)
+  - [🧩 Fazit:](#-fazit-3)
+- [Bonustipp](#bonustipp)
+  - [ASR/STT](#asrstt)
+  - [TTS](#tts)
+  - [STTS und TTSS](#stts-und-ttss)
+- [Grundlagen im Kompendium Informatik](#grundlagen-im-kompendium-informatik)
+<!-- /TOC -->
+
 ---
 
 ## Mögliche Titelvorschläge
@@ -31,7 +97,7 @@ Sprachassistenten wie Alexa, Siri oder Google Assistant haben sich im Alltag vie
   - Anmerkung: Deutsche Begriffe sind Aktivierungswort, Aufwachwort, Aufwachbefel, Triggerwort, usw.
 - Sprachassistenten sind oft nur beschränkt individualisierbar, Anwendungen werden eingestellt oder eingeschränkt.
   - Google Nest ermöglicht es oft bspw. Smart Home Geräte zwar anzubinden, diese können darüber aber nicht gesteuert werden, sondern meist nur Zustände abgefragt werden.
-  - Amazon hat bspw. ihre Policy geändert und seitdem wird das openHAB Skill aus Sicherheitsgründen nicht mehr unterstützt, damit wäre ein Smart Home, welches über openHAB gesteuert wurde nicht mehr bedienbar.
+  - Amazon hat bspw. ihre Policy geändert und seitdem wird das openHAB Skill aus Sicherheitsgründen nicht mehr unterstützt, damit wäre ein Smart Home, welches über openHAB gesteuert wurde nicht mehr bedienbar. (Aktuellen Stand vor der Ausschreibung prüfen.)
 
 ---
 
@@ -67,22 +133,37 @@ Ziel der Arbeit ist die Entwicklung und prototypische Umsetzung eines lokalen Sp
 
 ## Mögliche Forschungsschwerpunkte
 
-- Vergleich von Offline-STT-Engines: `Whisper`, `Vosk`, `DeepSpeech`
-- Evaluation von NLU-Systemen: `Rasa`, `Snips`, Transformer-basierte Lösungen
-- Training eigener Hotword-Modelle mit `Porcupine`, `Mycroft Precise`
+- Vergleich von Offline-STT-Engines: `Whisper` (verschiedene Modellgrößen und Implementierungen), `Vosk`
+- Evaluation von NLU-Ansätzen: regelbasiert, klassische Klassifikatoren, `Rasa`, Transformer-basierte Lösungen, lokale LLMs
+- Training eigener Hotword-Modelle mit `openWakeWord`, `Porcupine` oder `Rustpotter`
 - Einfluss der Hardware auf Performance (z. B. Raspberry Pi vs. Jetson Nano)
 - Kombination regelbasierter und ML-basierter Dialogmodelle
 - Lokaler Datenschutz vs. Cloud-Performance
 
 ---
 
+## Abgrenzung: openHAB bringt eigene Sprachdienste mit
+
+openHAB besitzt eine eigene, modulare **Voice-Infrastruktur**: Keyword Spotter (z. B. Rustpotter, Porcupine), Speech-to-Text (z. B. **Whisper** lokal über whisper.cpp oder über eine kompatible API, Vosk), Human Language Interpreter (z. B. Standard-Interpreter, HABot) und Text-to-Speech (z. B. **Piper**), verbunden über das **Dialog Processing**. In der Community gibt es bereits vollständig lokale Sprachsteuerungen auf dieser Basis.
+
+Für die Arbeit heißt das:
+
+* Diese Infrastruktur muss im **Stand der Technik** beschrieben werden.
+* Die Arbeit muss begründen, was ein **eigenständiger** Assistent darüber hinaus leistet (z. B. Unabhängigkeit vom Smart-Home-System, eigene REST API und Weboberfläche, frei konfigurierbare WENN-DANN-Regeln, Anbindung weiterer Dienste) – oder sie nutzt die openHAB-Dienste bewusst als Bausteine.
+
+> **Aktualitätshinweis:** Diese Idee ist über einen längeren Zeitraum entstanden. In späteren Abschnitten genannte Werkzeuge wie **Snips NLU**, **DeepSpeech**, **Coqui STT**, **Mycroft** bzw. **Mycroft Precise** und **Snowboy** werden nicht mehr gepflegt; sie sind dort als Teil der Recherche stehen geblieben. Für neue Projekte die aktuellen Alternativen verwenden.
+
+Überblick über die Verarbeitungskette und den Wartungsstatus lokaler Werkzeuge: [Sprachassistenten](https://github.com/Michdo93/Informatik/blob/main/KI%20%26%20Sprachverarbeitung/Sprachassistenten.md).
+
+---
+
 ## Eingesetzte Technologien (Auswahl)
 
 - Programmiersprache: **Python**
-- Hotword-Erkennung: `Porcupine`, `Mycroft Precise`
-- Speech-to-Text: `Whisper`, `Vosk`, `DeepSpeech`
-- NLU: `Rasa`, `Snips`, eigene ML-Modelle mit `transformers`
-- TTS: `Coqui TTS`, `eSpeak`, `Festival`
+- Hotword-Erkennung: `openWakeWord`, `Porcupine`, `Rustpotter`
+- Speech-to-Text: `Whisper` (z. B. `faster-whisper`, `whisper.cpp`), `Vosk`
+- NLU: eigene Regeln, `scikit-learn`/`spaCy`, `Rasa`, eigene ML-Modelle mit `transformers`
+- TTS: `Piper`, `eSpeak NG`, Coqui TTS (Community-Fork)
 - Plattform: **Raspberry Pi 5**, ggf. Mini-PC
 
 (Unten sieht man, dass es hier verschiedene Alternativen zur Auswahl gibt. Auch mit Erfahrungen während der Bearbeitung darf hier natürlich die Technologien getauscht werden.)
@@ -129,6 +210,7 @@ Ein eigener Sprachassistent ist ein spannendes Projekt – technisch anspruchsvo
   - Vielleicht machen 90-120 Sekunden als maximal Sinn, weil wenn ich zu viel rede, ist man einfach nicht präzise genug. Eine KI würde nicht mehr verstehen, worauf man hinaus will. Wenn man einen regelbasierten Ansatz hat, könnten aber z. B. 120 Sekunden schon viel zu lange sein, weil man dann in 120 Sekunden ja Wort für Wort denselben Satz sagen muss, wie der, der durch einen Trigger ausgelöst werden soll. Hier wäre dann je länger ein Satz ist, es umso schwieriger, dass nach Abzug von Fehlern der richtige Satz noch erkannt wird.
 - Braucht eine Spracheingabe eine minimale Dauer?
   - Vielleicht macht es Sinn, dass man mindestens 15-20 Sekunden etwas sagen sollte, ansonsten wird dies verworfen, weil zu wenige Informationen vorhanden wären, als dass man damit etwas anfangen könnte. 
+  - Anmerkung: Typische Sprachbefehle („Licht in der Küche an“) dauern nur **1–3 Sekunden**. Eine Mindestdauer von 15–20 Sekunden würde gerade die häufigsten Befehle verwerfen. Üblich ist, das Ende der Äußerung über eine **Sprachpause** zu erkennen (Voice Activity Detection) und nur sehr kurze Geräusche zu verwerfen. Das Whisper-Add-on von openHAB arbeitet z. B. mit einstellbarer minimaler und maximaler Aufnahmedauer sowie einer maximalen Stilledauer im Bereich weniger Sekunden.
 - Brauche ich Abbruchkritierien?
   - Abbruchkriterien könnten Worte wie "Stop" oder "Halt" sein. Eventuell gekoppelt, dass man vorher erneut das Hotword sagen muss.
   - Ein Abbruchkriterium ist natürlich, dass es keinen Triggersatz gibt.
@@ -192,6 +274,8 @@ Die Sprachassistenz umfasst mehrere Stufen:
 | **4. Antwortgenerierung**     | Aktion ausführen oder Antwort erzeugen | Eigene Logik / GPT-Anbindung / Regelbasiert                      |
 | **5. Text-zu-Sprache (TTS)**  | Text in Sprache umwandeln              | `Coqui TTS`, `Festival`, `eSpeak`, Google TTS, `ResponsiveVoice` |
 
+> ⚠️ Einige Werkzeuge dieser Tabelle werden **nicht mehr gepflegt** (u. a. Snowboy, DeepSpeech, Snips NLU, Mycroft Precise; das Unternehmen hinter Coqui TTS existiert nicht mehr). Aktuelle Alternativen und ihren Status listet [Sprachassistenten → Lokale Werkzeuge](https://github.com/Michdo93/Informatik/blob/main/KI%20%26%20Sprachverarbeitung/Sprachassistenten.md#lokale-werkzeuge-und-ihr-status).
+
 Neben der Sprachassistenz benötigt man meiner Meinung nach `Flask` für die `REST API` und für eine `Weboberfläche` des Sprachassistenzen. Wahrscheinlich konfiguriert man über die Weboberfläche Triggersätze. Entsprechend wird auch eine Datenbank (`SQLite` mit `SQLAlchemy`-Anbindung) für Passwörter und Regeln benötigt.
 
 #### Beispielvergleich
@@ -200,54 +284,24 @@ Die Auswahl von verschiedenen Libraries kann ja Vor- und Nachteile hervorheben.
 
 ##### Hotword Detection
 
-###### ✅ Vergleich: **Lokale Hotword-Erkennungssysteme**
+###### ✅ Vergleich: **Lokale Hotword-Erkennungssysteme** (Stand 2026)
 
-| **Library / System** | **Sprache / API** | **Lokal** | **Cloudfrei**     | **Status**           | **Besonderheiten**                                      |
-| -------------------- | ----------------- | --------- | ----------------- | -------------------- | ------------------------------------------------------- |
-| 🔹 `Porcupine`       | Python 3 / C      | ✅         | ✅\*               | ✅ aktiv              | Sehr effizient, Wakeword-Modelle mit Lizenz generierbar |
-| 🔹 `Snowboy`         | Python 2 / C++    | ✅         | ⚠️ (für Training) | ❌ eingestellt (2020) | Exzellente Erkennung, kein Custom Training mehr         |
-| 🔹 `Mycroft Precise` | Python 3          | ✅         | ✅                 | ✅ aktiv (2024 Forks) | Open-Source, trainierbar mit eigenem Datensatz          |
-| 🔸 `Picovoice`       | Python 3 / Web    | ⚠️ teils  | ❌                 | ⚠️ deprecated        | Picovoice war Suite, nun nur noch Porcupine aktiv       |
-
----
-
-###### 🧠 Klarstellungen:
-
-* **Porcupine** (by Picovoice):
-
-  * Sehr **effizient**, läuft sogar auf Mikrocontrollern.
-  * Man kann eigene Wakewords **lokal erzeugen**, aber dazu braucht man evtl. die **Picovoice Console** (Web).
-  * Die Laufzeit selbst ist **vollständig offline**.
-  * Lizenzmodell: Kostenlos für Einzelpersonen / nicht-kommerzielle Zwecke.
-
-* **Snowboy**:
-
-  * Früher sehr populär für lokale Wakeword-Erkennung.
-  * Leider **nicht mehr gepflegt**.
-  * Eigene Wakewords waren nur über eine Web-Oberfläche trainierbar, die inzwischen offline ist.
-
-* **Mycroft Precise**:
-
-  * **Open Source und lokal trainierbar** mit eigenem Datensatz.
-  * Python 3-kompatibel, kann auf Linux / Raspberry Pi laufen.
-  * Aktive Community / Forks, auch 2024 noch in Benutzung.
-  * Funktioniert gut für DIY- oder Datenschutzprojekte.
-
-* **Picovoice SDK**:
-
-  * Die **gesamte SDK-Suite (Speech-to-Text etc.)** wurde eingeschränkt, empfohlen wird jetzt direkt **Porcupine**.
-  * **Nicht mehr aktiv entwickelt** als Komplettpaket.
-
----
+| **Library / System** | **Lizenz** | **Status** | **Besonderheiten** |
+| --- | --- | --- | --- |
+| 🔹 `openWakeWord` | Open Source | ✅ aktiv | Eigene Wakewords trainierbar (auch mit synthetischen Sprachdaten), u. a. in Home Assistant im Einsatz |
+| 🔹 `Porcupine` (Picovoice) | proprietär | ✅ aktiv | Sehr effizient; eigene Wakewords über die Picovoice Console; **AccessKey** erforderlich, Nutzungsbedingungen beachten |
+| 🔹 `Rustpotter` | Open Source | ✅ aktiv | In openHAB als Keyword Spotter verfügbar; Wakeword aus eigenen Aufnahmen |
+| 🔸 `Mycroft Precise` | Open Source | ⚠️ kaum gepflegt | Das Unternehmen hinter Mycroft hat den Betrieb eingestellt; nur Community-Forks |
+| 🔸 `Snowboy` | – | ❌ eingestellt (2020) | Kein Training eigener Wakewords mehr möglich |
 
 ###### 📌 Fazit / Empfehlung:
 
-| Einsatzziel                              | Empfehlung                         |
-| ---------------------------------------- | ---------------------------------- |
-| Lokaler Assistent mit Custom Hotword     | 🔹 **Mycroft Precise**             |
-| Minimaler Stromverbrauch (z. B. Pi Zero) | 🔹 **Porcupine**                   |
-| Forschung / Training eigener Wakewords   | 🔹 **Mycroft Precise**             |
-| Veraltete Tools vermeiden                | ❌ Kein Snowboy, kein Picovoice SDK |
+| Einsatzziel | Empfehlung |
+| --- | --- |
+| Lokaler Assistent mit eigenem, frei trainierbarem Wakeword | 🔹 **openWakeWord** |
+| Minimaler Ressourcenbedarf, Lizenz akzeptabel | 🔹 **Porcupine** |
+| Integration in openHAB | 🔹 **Rustpotter** (oder Porcupine) |
+| Veraltete Tools vermeiden | ❌ Kein Snowboy, kein Mycroft Precise für neue Projekte |
 
 ---
 
@@ -341,8 +395,8 @@ Dies bedarf noch einer genaueren Planung.
 
 * **Hotword**: Porcupine (Wakeword: „Hey Kiro“)
 * **ASR**: Vosk (lokal) oder Whisper
-* **NLU**: Rasa (mit YAML-Intents)
-* **TTS**: Coqui TTS
+* **NLU**: eigene Regeln oder Rasa (mit YAML-Intents)
+* **TTS**: Piper (oder Coqui TTS)
 * **Logik**: Python-Controller, der Aktionen oder Antworten triggert
 
 ---
@@ -361,10 +415,10 @@ Anmerkung: Cloud- oder Web-Anbindungen können ja das System jederzeit erweitern
 ### 🚀 Einstiegsvorschlag (für Prototypen)
 
 1. **Raspberry Pi 5 + USB-Mikrofon**
-2. Hotword: `Porcupine` (kostenloser Wakeword-Engine)
+2. Hotword: `openWakeWord` oder `Porcupine` (AccessKey nötig)
 3. STT: `Whisper` oder `Vosk`
 4. NLU: `Rasa` (mit einfachen Intents)
-5. TTS: `Coqui TTS` oder Google TTS API
+5. TTS: `Piper` (lokal) oder ein Cloud-Dienst zum Vergleich
 6. Alles orchestriert mit `Python`
 
 ---
@@ -384,114 +438,7 @@ Entspricht der Aufbau von einem Chatbot wirklich dem Aufbau eines Sprachassisten
 
 ### Fuzzy Matching
 
-Das **Fuzzy Matching** kann man im deutschen als unscharfe Suche betiteln. Es ist eine Klasse von String-Matching-Algorithmen, mit der man bestimmte Zeichenketten (Strings) in einer längeren Zeichenkette oder einem Text suchen bzw. finden können sollte.  Es wird daher auch oft als Fuzzy-Suche oder Fuzzy-String-Suche betitelt.
-
-Aus:
-
-[https://www.klippa.com/de/blog/informativ/fuzzy-matching-de/](https://www.klippa.com/de/blog/informativ/fuzzy-matching-de/)
-
-Mit Fuzzy-Matching kann ich darauf reagieren, wenn z. B. nur 80% eines Wortes/Satzes richtig erkannt wurde. Hier mal Beispiele.
-
-```
-Gesucht: Bestellnummer
-
-Richtig wären:
-Bestellnr.
-Bestelnummer
-Bestellnumer
-Bestellnummmer
-...
-```
-
-Also mögliche Tippfehler oder auch Abkürzungen sollen ja darufhin deuten, dass ein- und dasselbe Worte gemeint ist. In Zusammenhang mit Synonymen würde man durch Fuzzy Matching dem Benutzer so extrem viele Eingabemöglichkeiten ermöglichen. Man formuliert ja nicht nur Sätze um, man vertippt sich auch mal oder kürzt einzelne Wörter ab.
-
-**Fuzzy Matching** nimmt also Korrekturen vor. Dies könnten im allgemeinen die nachfolgenden sein:
-
-* **Einfügen** – Hinzufügen eines Buchstabens zur Vervollständigung des Wortes (z. B. `Rechnun` wird zu `Rechnung`)
-* **Löschen** – Entfernen eines Buchstabens aus einem Wort (z. B. `Rechnnung` wird zu `Rechnung`)
-* **Substitution** – Vertauschen eines Buchstabens, um ein Wort zu korrigieren (z. B. `Technung` wird zu `Rechnung`)
-* **Transposition** – Vertauschen von Buchstaben, um ein Wort zu korrigieren (z. B. `Rehcnung` wird zu `Rechnung`)
-
-Jeder Korrektur, die durchgeführt werden muss, wird eine „Bearbeitungsdistanz“ von 1 zugeschrieben. Die Bearbeitungsdistanzen beeinflussen die oben erwähnte Trefferquote. Wenn Sie beispielsweise eine Zeichenfolge mit 11 Zeichen haben und 2 Korrekturen vornehmen müssen, beträgt die endgültige Trefferquote **81,81 %**.
-
-```
-Berechnung: 100%- 2 / 11= 81.81%  
-```
-
-Neben diesen Korrekturen kann **Fuzzy Matching** auch verwendet werden, um Zeichensetzungen, zusätzliche Wörter und fehlende Leerzeichen in Zeichenketten oder Texten zu korrigieren.
-
----
-
-#### Fuzzy-Matching-Algorithmen
-
-Fuzzy Matching fällt in die Kategorie der Methoden, für die es keinen spezifischen Algorithmus gibt, der alle Szenarien und Anwendungsfälle abdeckt. Daher werden wir einige der am häufigsten verwendeten und zuverlässigsten Fuzzy-Matching-Algorithmen für die Suche nach ungefähren Datenübereinstimmungen behandeln:
-
-* Levenshtein-Distanz (LD)
-* Hamming-Distanz (HD)
-* Damerau-Levenshtein
-
----
-
-##### Levenshtein-Distanz
-
-Die **Levenshtein-Distanz (LD)** ist eine Fuzzy-Matching-Technik, die zwei Zeichenfolgen beim Vergleich und der Suche nach einer Übereinstimmung berücksichtigt. Je höher der Wert der Levenshtein-Distanz ist, desto weiter sind die beiden Zeichenfolgen oder „Begriffe“ von einer identischen Übereinstimmung entfernt.
-
-Wie erhalten wir nun den Wert der Levenshtein-Distanz? Die LD zwischen den beiden Zeichenfolgen entspricht der Anzahl der Änderungen, die erforderlich sind, um eine Zeichenfolge in die andere umzuwandeln. Für die LD gelten das Einfügen, Löschen und Ersetzen eines einzelnen Zeichens als Bearbeitungsoperationen.
-
-Nehmen wir an, Sie möchten die LD zwischen „Rechnungsnummer“ und „Rechnungs-Nr.“ messen. Der Abstand zwischen den beiden Begriffen ist „1 x u“, „2 x m“ und „1 x e“, was einem Abstand von 4 entsprechen würde. Warum? Weil Sie diese Zeichen hinzufügen müssten, um eine Übereinstimmung zu erreichen. Siehe die Beispiele unten.
-
----
-
-###### Levenshtein-Abstand Beispiel
-
-> **Rechnungnummer** → Rechnung**s**nummer (Einfügung von „**s**“) – Abstand: 1  
-> **Rechnung numr** → Rechnungsnu**m**m**e**r (Einfügung von „**m**“ & „**e**“) – Abstand: 2  
-> **Rechnung nr** → Rechnungsn**u****m****m****e**r (Einfügung von „**u, m, m, e**“) – Abstand: 4
-
----
-
-##### Hamming-Distanz
-
-Die **Hamming-Distanz (HD)** unterscheidet sich nicht allzu sehr von der Levenshtein-Distanz. Die Hamming-Distanz wird häufig verwendet, um den Abstand zwischen zwei gleich langen Textabschnitten zu berechnen.
-
-Die HD-Methode basiert auf der **ASCII**-Tabelle (American Standard Code for Information Interchange). Zur Berechnung des Abstandswertes verwendet der Hamming-Distanz-Algorithmus die Tabelle, um den Binärcode zu bestimmen, der jedem Buchstaben in den Zeichenketten zugeordnet ist.
-
----
-
-###### Hamming-Abstand-Beispiel
-
-Nehmen wir die folgenden Textzeichenfolgen „Number“ und „Lumber“ als Beispiel. Wenn wir versuchen, den HD zwischen den Zeichenfolgen zu bestimmen, ist der Abstand nicht 1, wie es mit dem Levenshtein-Algorithmus der Fall wäre. Stattdessen würde er 10 betragen. Das liegt daran, dass die ASCII-Tabelle einen Binärcode von **(1001110)** für den Buchstaben **N** und **(1001100)** für den Buchstaben **L** anzeigt.
-
-Beispielrechnung:
-
-> **D** = N – L = 1001110 – 1001100 = **10**
-
----
-
-##### Damerau-Levenshtein
-
-Das Damerau-Levenshtein-Verfahren misst auch den Abstand zwischen zwei Wörtern, indem es die erforderlichen Änderungen misst, die vorgenommen werden müssen, um ein Wort an das andere anzupassen. Diese Änderungen hängen von der Anzahl der Operationen ab, wie z. B. Einfügung, Löschung oder Ersetzung eines einzelnen Zeichens oder Transposition zweier benachbarter Zeichen.
-
-Hier unterscheidet sich die Damerau-Levenshtein-Distanz von der regulären Levenshtein-Distanz, da sie zusätzlich zu den Einzelzeichen-Editieroperationen, auch Transpositionen berücksichtigt, um eine ungefähre Übereinstimmung zu finden (Fuzzy Match).
-
----
-
-###### Damerau-Levenshtein Beispiel
-
-> **Zeichenfolge 1:** Re<strong>ch</strong>nun<strong>g</strong>  
-> **Zeichenfolge 2:** Re<strong>hc</strong>nun  
->   
-> **Operation 1:** Transposition → Vertauschen der Zeichen „**h**“ und „**c**“  
-> **Operation 2:** Einfügen eines „**g**“ am Ende der Zeichenfolge 2
-
-
-Da zwei Operationen erforderlich waren, um die beiden Wörter identisch zu gestalten, **beträgt der Abstand 2**. Vereinfacht ausgedrückt zählt jede Operation wie Einfügung, Löschung, Transposition usw. als ein Abstand von „1“. Mit der Levenshtein-Distanz müssten Sie jedoch drei Korrekturen vornehmen, was einem Abstand von 3 entspricht.
-
-Alle oben genannten Fuzzy-Matching-Algorithmen unterscheiden sich natürlich in der Art und Weise, wie die Bearbeitungsdistanz berechnet wird. Dies ist der Grund, warum es keinen FM-Algorithmus gibt, der für alle geeignet ist. Von den drei vorgestellten Algorithmen ist die Levenshtein-Distanz jedoch der am häufigsten verwendete FM-Algorithmus in der Datenverwaltung und Datenwissenschaft.
-
-Empfehlung: In Python kann man die [fuzzywuzzy-Bibliothek](https://github.com/seatgeek/fuzzywuzzy) testen oder einen eigenen Algorithmus implementieren.
-
----
+**Fuzzy Matching** (unscharfe Suche) vergleicht Zeichenketten über eine **Editierdistanz** – die Anzahl der Einfügungen, Löschungen, Ersetzungen (und ggf. Vertauschungen), die eine Zeichenkette in die andere überführen. Bekannte Verfahren sind Levenshtein, Damerau-Levenshtein, Hamming und Jaro-Winkler. Ausführlich mit Beispielen und Python-Code: [Fuzzy Matching](https://github.com/Michdo93/Informatik/blob/main/KI%20%26%20Sprachverarbeitung/Fuzzy%20Matching.md).
 
 #### 🧠 **Wird Fuzzy Matching für einen Sprachassistenten benötigt?**
 
@@ -534,7 +481,7 @@ elif "spiel musick" in user_input:  # Tippfehler!
 ##### Mit Fuzzy Matching:
 
 ```python
-from fuzzywuzzy import fuzz
+from rapidfuzz import fuzz      # actively maintained successor of fuzzywuzzy
 if fuzz.partial_ratio("spiel musik", user_input) > 80:
     do_music()
 ```
@@ -574,81 +521,11 @@ Ich denke in einer gut ausgearbeiteten Abschlussarbeit erläutert man diesen Ver
 
 ### Intent, Entity, Confidence Score
 
-Aus:
+* **Intent:** die Absicht hinter einer Äußerung (z. B. `licht_schalten`) – eine Klasse aus einer festen Liste.
+* **Entity:** Parameter, die aus der Äußerung extrahiert werden (Raum, Gerät, Wert).
+* **Confidence:** wie sicher die Zuordnung ist; über **Schwellwerte** entscheidet man zwischen Ausführen, Rückfrage und Fallback.
 
-[https://www.melibo.de/blog/was-sind-intent-und-entity](https://www.melibo.de/blog/was-sind-intent-und-entity)
-
----
-
-#### Intent
-
-Intents, zu Deutsch „Absichten“, sind Zwecke oder Ziele, die in den Eingaben eines Kunden zum Ausdruck kommen, um z.B. eine Frage zu einer Retoure zu stellen. Durch die Erkennung der Absicht, die sich in der Kundeneingabe ausdrückt, versucht der KI-Chatbot den richtigen Dialog zu finden und die passende Ausgabe zu wählen. Dafür nutzen KI-Chatbots maschinelles Lernen, um in natürlicher Sprache die vorher definierte Absicht (Intent) zu erkennen. [1] Einfach gesagt, Intents sind Fragen der User:innen, die dem Chatbot zu einem speziellen Thema gestellt werden und der Versuch des KI-Chatbots, die passende Antwort zu erkennen, um das Problem zu lösen bzw. die Frage zu beantworten.
-
----
-
-##### Wie funktionieren Intents?
-
-Bestehende Anbieter wie unter anderem der IBM Watson Assistant [1], Rasa [2] oder Microsoft LUIS [3] basieren alle meist auf dem Prinzip der Intent-Ausgabe. Bevor der Chatbot Intents erkennen kann, müssen erst mal alle Absichten der User:innen definiert werden. Hierfür ist es wichtig, dass man seine Kundenanfragen erst mal identifiziert und seinen Use-Case richtig versteht. Nachdem der Intent-Katalog erstellt und der Bot online genommen wurde, werden die User:innen dem Chatbot Fragen stellen. Jede Anfrage der User:innen durchläuft das sogenannte Intent-Matching, also der Zuordnung der Anfrage aus den gesamten Inhalten des Chatbots. Dabei wird anhand von NLP (Natural Language Processing) ein Confidence-Score berechnet, um anhand von Wahrscheinlichkeiten die passende Antwort auszugeben.
-
----
-
-#### Confidence-Score
-
-Ein kurzer Exkurs zum Thema Confidence-Scores. Die Confidence-Scores liegen zwischen 0 und 1 und geben an, zu wie viel Prozent der Chatbot ein Intent erkannt hat. Zu jeder gestellten Frage der User:innen berechnet der Chatbot also einen Confidence-Score und versucht auf dieser Grundlage, durch Wahrscheinlichkeiten, die richtige Antwort an die User:innen auszugeben. Die Confidence-Scores sind meistens voreingestellt und liegen zwischen 0,6 und 0,7. Das heißt, dass der Chatbot Antworten nur dann ausgibt, wenn die Erkennungswahrscheinlichkeit bei mindestens 60 % liegt. Nehmen wir nun als Beispiel an, dass User:innen die Frage stellen „Was kannst du so?“, um zu erfahren, welche Themen der Chatbot überhaupt beantworten kann. Der KI-Chatbot erkennt zu 89 % Prozent den Intent „Was kannst du?“. In diesem Beispiel gibt der Chatbot die passende Antwort aus und beantwortet somit die Frage.
-
----
-
-##### Bestandteile eines Intents
-
-Ein Intent besteht also aus dem: Intentnamen, dem User-Input, dem Confidence-Score und einer Antwort. Abhängig von der genutzten Technologie können noch weitere Bestandteile dazu kommen, wie Variablen, Actions und Entities.
-
-Ein Beispiel für Intents
-
-(1) User-Input: Frage eines Users
-
-🙎‍♂️: „Vorteile eines Chatbots“
-🙎‍♂️: „Was können Chatbots besonders gut?“
-🙎‍♂️: „Warum sollte ich einen Chatbot holen?“
-
-(2) Confidence-Score und (3) Intentnamen „Vorteile Chatbot“: Berechnung der Wahrscheinlichkeit anhand vom User-Input
-
-🧮 : 100 % Erkennung des Intents „Vorteile Chatbot“
-
-(4) Antwort des Chatbots auf die Frage „Vorteile Chatbots“
-
-🤖 : Zu den Vorteilen von Chatbots gehören unter anderem und abhängig von der Branche: Automatisierung von Prozessen, wodurch Fehler beim Support reduziert sowie Zeit und Geld eingespart werden können. Verkürzte Wartezeiten für den Kunden. 24/7 Kundensupport. Effizientere Strukturen. Weniger manueller Aufwand für dich.
-
----
-
-#### Entity
-
-Im Unterschied zu Intents dienen Entitys oder auch Entities dazu, Informationen der User:innen aus der natürlichen Sprache zu extrahieren. Jedes Entity verfügt über eine Reihe von Eigenschaften, die mit ihr verbunden sind. Dabei kannst du auf Informationen deines Entities zugreifen. Wie bei einem Intent gibt der Chatbot an, wie hoch der Confidence-Score liegt. Im Unterschied zu Intents liegt der Confidence-Score, aber bei 0 oder 1. Unabhängig davon, ob und wie die Erkennung des Entitys eingestellt ist, haben sogenannte System-Entites immer eine Erkennung von 1. Jedes Entity besitzt einen Wert, einen sogenannten Entitätswert. Bei der Erstellung von Entities ist es notwendig, dass neben dem Wert auch Typen definiert werden. Unter Typen versteht man allgemein Synonyme, also Wörter, die sich ebenfalls auf dasselbe Vorhaben beziehen, es nur anders umschreiben. Je mehr Synonyme ein Entity hat, desto besser die Erkennung des Chatbots [4].
-
-Grundsätzlich unterscheiden wir zwischen System-Entities und Customize-Entities. Die System-Entites sind voreingestellt, das heißt im System bereits enthalten. Darunter fallen etwa Zahlen, Uhrzeiten oder Adressen. Diese Entities sind besonders beliebt und wurden in der Vergangenheit besonders häufig verwendet. Die Customize-Entities dagegen sind selbst definierte Werte, die auf den jeweiligen Use-Case angepasst werden.
-
----
-
-##### Ein Beispiel für Entities in der Praxis
-
-🙎‍♂️: „Wann kommt mein Produkt Chatbot-Experte in der Landstraße 5 an?“
-
----
-
-##### Entities in diesem Beispiel:
-
-Produkt Chatbot Experte (Customize-Entity product_type)
-Landstraße 5 (Sytem-Entity street_adress)
-
----
-
-##### Vorteile von Entites:
-
-Mit Entities kann man User:innen durch Chat Flows in Form von Buttons navigieren, schnell Synonyme definieren und mehrere Anfragen auf einmal verarbeiten. Die System-Entitys helfen außerdem dabei, die beliebten Anfragen zum Thema Ort, Zeit und Adresse abzufangen.
-
-[1]: https://cloud.ibm.com/docs/assistant?topic=assistant-intents
-[2]: https://rasa.com/open-source/
-[3]: https://docs.microsoft.com/en-us/azure/cognitive-services/luis/luis-concept-utterance
-[4]: https://cloud.ibm.com/docs/assistant?topic=assistant-expression-language
+Ausführlich mit Beispielen: [Intents, Entities & Confidence](https://github.com/Michdo93/Informatik/blob/main/KI%20%26%20Sprachverarbeitung/Intents%2C%20Entities%20%26%20Confidence.md).
 
 ---
 
@@ -740,7 +617,8 @@ Hier ist eine Übersicht:
 
 | Library / Tool | Sprache | Lokal | Qualität | SSML-Unterstützung     | Bemerkung                              |
 | -------------- | ------- | ----- | -------- | ---------------------- | -------------------------------------- |
-| **Coqui TTS**  | Python  | ✅     | ⭐⭐⭐⭐☆    | Teilweise (SSML-light) | Moderne TTS, sehr anpassbar            |
+| **Piper**      | C++/Python | ✅  | ⭐⭐⭐⭐☆    | ❌ (nur Text)           | Schnell, läuft auf dem Raspberry Pi, mehrere deutsche Stimmen; derzeit erste Wahl für lokale TTS |
+| **Coqui TTS**  | Python  | ✅     | ⭐⭐⭐⭐☆    | Teilweise (SSML-light) | Moderne TTS, sehr anpassbar; Firma eingestellt (2024), Weiterentwicklung als Community-Fork |
 | **eSpeak NG**  | C/C++   | ✅     | ⭐⭐☆☆☆    | ❌                      | Extrem leichtgewichtig, viele Sprachen |
 | **Festival**   | C++     | ✅     | ⭐⭐☆☆☆    | ❌                      | Veraltet, aber stabil                  |
 | **RHVoice**    | C++     | ✅     | ⭐⭐⭐☆☆    | ❌                      | Gute Qualität, Open Source             |
@@ -760,7 +638,7 @@ Hier ist eine Übersicht:
 * Stimmen für viele Sprachen, inkl. Deutsch
 * Eingeschränkte SSML-ähnliche Features (`<break>`, `rate`, `pitch` per CLI/Args)
 
-👉 Empfohlen für dein Projekt, wenn du **Qualität + Lokalität** brauchst
+👉 Qualitativ stark, aber ressourcenhungrig und nur noch als Community-Fork gepflegt; für den Raspberry Pi ist **Piper** meist die bessere Wahl
 
 ---
 
@@ -799,7 +677,8 @@ Hier ist eine Übersicht:
 
 | Ziel                                     | Empfehlung                         |
 | ---------------------------------------- | ---------------------------------- |
-| Moderne TTS, lokale Nutzung, erweiterbar | **Coqui TTS**                      |
+| Schnelle, lokale TTS auf schwacher Hardware | **Piper**                       |
+| Moderne TTS, lokale Nutzung, erweiterbar | **Coqui TTS** (Community-Fork)     |
 | Einfache Integration, geringe Ressourcen | **pyttsx3** oder **eSpeak NG**     |
 | Vollständige SSML-Verarbeitung lokal     | **MaryTTS** oder Coqui (teilweise) |
 
@@ -991,11 +870,17 @@ if __name__ == "__main__":
 #### 2. `hotword/detector.py` (z. B. mit `pvporcupine`)
 
 ```python
+import os
+
 import pvporcupine
 import pyaudio
 
 def wait_for_hotword():
-    porcupine = pvporcupine.create(keywords=["computer"])
+    # current Porcupine versions require a (free) AccessKey from the Picovoice Console
+    porcupine = pvporcupine.create(
+        access_key=os.environ["PICOVOICE_ACCESS_KEY"],
+        keywords=["computer"],
+    )
     audio_stream = pyaudio.PyAudio().open(
         rate=porcupine.sample_rate,
         channels=1,
@@ -1608,3 +1493,14 @@ Bei cloudbasierten Services spricht man auch gerne von `STTS` und `TTSS`, also v
 ---
 
 Ein koversationsfähiger Sprachassistent würde wahrscheinlich den Rahmen einer Abschlussarbeit ordentlich spregen. Könnte aber in Anschluss zu einer guten vorangegangenen Abschlussarbeit ein sehr spannendes Thema für eine Masterarbeit werden.
+
+---
+
+## Grundlagen im Kompendium Informatik
+
+* [Sprachassistenten](https://github.com/Michdo93/Informatik/blob/main/KI%20%26%20Sprachverarbeitung/Sprachassistenten.md) – Verarbeitungskette, Befehl vs. Konversation, Wartungsstatus lokaler Werkzeuge, openHAB-Voice, SSML, Messgrößen (WER, Latenz)
+* [Intents, Entities & Confidence](https://github.com/Michdo93/Informatik/blob/main/KI%20%26%20Sprachverarbeitung/Intents%2C%20Entities%20%26%20Confidence.md)
+* [Fuzzy Matching](https://github.com/Michdo93/Informatik/blob/main/KI%20%26%20Sprachverarbeitung/Fuzzy%20Matching.md)
+* [Machine-Learning-Grundlagen](https://github.com/Michdo93/Informatik/blob/main/KI%20%26%20Sprachverarbeitung/Machine-Learning-Grundlagen.md)
+* [State-Pattern](https://github.com/Michdo93/Informatik/blob/main/Design%20Pattern/Verhaltensmuster/State.md) – Dialog als Zustandsautomat
+* [systemd-Services](https://github.com/Michdo93/Informatik/blob/main/Linux%20%26%20Werkzeuge/systemd-Services.md) – den Assistenten als Dienst betreiben

@@ -1,5 +1,39 @@
 # Konzeption und Implementierung eines webbasierten Chatbots mit trainierbarem KI-Modul zur Interaktion mit openHAB
 
+| | |
+| --- | --- |
+| **Art** | Bachelorarbeit |
+| **Schwerpunkte** | Webentwicklung (Flask), NLP/NLU, Datenbanken, REST |
+| **Ausschreibung** | [Chatbot für openHAB.odt](Ausschreibungen/Chatbot%20f%C3%BCr%20openHAB.odt) |
+| **Verwandte Ideen** | [Sprachassistent](Sprachassistent.md) (gleiche zentrale API, Sprache statt Text), [State Prediction](State%20Prediction%20mit%20openHAB.md) |
+
+<!-- TOC -->
+## Inhaltsverzeichnis
+
+- [🎓 Titelvorschläge für die Bachelorthesis](#-titelvorschläge-für-die-bachelorthesis)
+- [📣 Ausschreibungstext für die Bachelorthesis](#-ausschreibungstext-für-die-bachelorthesis)
+  - [Beschreibung:](#beschreibung)
+  - [Ziele der Arbeit:](#ziele-der-arbeit)
+  - [Technologien & Tools:](#technologien--tools)
+  - [Voraussetzungen:](#voraussetzungen)
+  - [Ergebnis der Arbeit:](#ergebnis-der-arbeit)
+- [✅ Vorteile der Trennung von Benutzer-Chat, Admin-Panel und zentraler API](#-vorteile-der-trennung-von-benutzer-chat-admin-panel-und-zentraler-api)
+  - [1. Modularität](#1-modularität)
+  - [2. Zentrale Kommunikationsschnittstelle (API-Gateway)](#2-zentrale-kommunikationsschnittstelle-api-gateway)
+  - [3. Sprachassistent einfach integrierbar](#3-sprachassistent-einfach-integrierbar)
+- [🧱 Empfehlung: Systemaufbau (logisch)](#-empfehlung-systemaufbau-logisch)
+  - [Idee](#idee)
+  - [Was ist das Ziel?](#was-ist-das-ziel)
+  - [Möglichkeiten der KI-Entwicklung für diesen Anwendungsfall](#möglichkeiten-der-ki-entwicklung-für-diesen-anwendungsfall)
+  - [Projektplanung und Struktur](#projektplanung-und-struktur)
+  - [Ansatz: KI-gestützter Chatbot mit TensorFlow (oder Alternativen)](#ansatz-ki-gestützter-chatbot-mit-tensorflow-oder-alternativen)
+  - [Exkurs: Wie funktioniert das ohne KI?](#exkurs-wie-funktioniert-das-ohne-ki)
+- [🧠 Zusammenfassung:](#-zusammenfassung)
+- [✅ Beispiel-Dialoge](#-beispiel-dialoge)
+- [Hintergrundwissen](#hintergrundwissen)
+- [Aktualitätshinweise (Stand 2026)](#aktualitätshinweise-stand-2026)
+<!-- /TOC -->
+
 ---
 
 ## 🎓 **Titelvorschläge für die Bachelorthesis**
@@ -118,7 +152,7 @@ Dazu braucht der Client (z. B. in Python oder als App):
 
 ## 🧱 Empfehlung: Systemaufbau (logisch)
 
-![picture alt](https://raw.githubusercontent.com/Michdo93/SmartHome-Ideen/refs/heads/main/screenshots/chatbot.png)
+![Systemaufbau Chatbot](screenshots/chatbot.png)
 
 ### Idee
 
@@ -158,7 +192,7 @@ Neben dem technisch-funktionalen Vorgehen stellt man im Laufe der Verwendung vie
 
    * **spaCy**: Ein schnelles und einfach zu verwendendes NLP-Framework. Es bietet viele vortrainierte Modelle und kann für Named Entity Recognition (NER), Textklassifikation und Intent-Erkennung verwendet werden.
    * **Rasa**: Eine End-to-End-NLP- und Dialog-Management-Lösung, die speziell für Chatbots entwickelt wurde. Mit Rasa kannst du ein Modell trainieren, das sowohl **Intents** (z. B. „Temperatur abfragen“) als auch **Entitäten** (z. B. „Wohnzimmer“) erkennt und auf diese reagiert.
-   * **Hugging Face Transformers**: Dies ist eine der modernsten NLP-Bibliotheken, die leistungsstarke vortrainierte Modelle wie GPT-3, BERT und T5 enthält. Damit kannst du ein Modell trainieren, das sowohl das Verstehen als auch das Generieren von Text übernimmt.
+   * **Hugging Face Transformers**: Dies ist eine der modernsten NLP-Bibliotheken mit zahlreichen vortrainierten Modellen wie BERT, T5 oder GPT-2 bzw. offenen Nachfolgemodellen. Damit kannst du ein Modell trainieren, das sowohl das Verstehen als auch das Generieren von Text übernimmt.
 
 ---
 
@@ -268,7 +302,7 @@ Ebenfalls wird deutlich, warum man so etwas wie Synonyme benötigt. Es kann z.B.
   );
   ```
 
-Rein theoretisch könnte man mit Reinforcement Learning auch den Chatverlauf für das Training wiederverwenden.
+Den Chatverlauf kann man auch für das Training wiederverwenden: Nicht oder unsicher erkannte Eingaben werden von einem Admin geprüft und dem richtigen Intent zugeordnet (*Active Learning*, siehe unten). Das ist überwachtes Lernen mit neuen Daten – Reinforcement Learning im engeren Sinn wäre es erst, wenn das System aus Belohnungen für seine Aktionen lernt.
 
 * **training\_data**: Speichert Trainingsdaten für das Modell.
 
@@ -281,6 +315,8 @@ Rein theoretisch könnte man mit Reinforcement Learning auch den Chatverlauf fü
       value VARCHAR(100)
   );
   ```
+
+> Hinweis: Die SQL-Beispiele mischen MySQL-Syntax (`AUTO_INCREMENT`, `ENUM`) und PostgreSQL-Syntax (`SERIAL`). In der Arbeit ein Datenbanksystem festlegen. Ein vollständiges, getestetes SQLite-Beispiel für Synonyme als n:m-Beziehung steht unter [Relationale Modellierung](https://github.com/Michdo93/Informatik/blob/main/Datenbanken/Relationale%20Modellierung.md).
 
 Für **Synonyme** muss man nun ein bisschen komplizierter vorgehen. Hier reicht eine einzige Tabelle nicht aus. Man hat eine `n:m`-Beziehung, bedeutet man muss drei Tabellen anlegen.
 
@@ -540,7 +576,7 @@ predicted_command = predict_intent(message)
 print("Vorhergesagter Befehl:", predicted_command)
 ```
 
-Bitte beachte, dass dies nur Pseudocode ist, welcher nicht in eine Gesamtstruktur eingebunden ist.
+Bitte beachte, dass dies nur ein Beispiel ist, welches nicht in eine Gesamtstruktur eingebunden ist. In aktuellen Keras-Versionen (Keras 3) ist `keras.preprocessing.text.Tokenizer` veraltet; stattdessen die Schicht `TextVectorization` verwenden. Für wenige Trainingsbeispiele ist ein LSTM außerdem überdimensioniert – ein einfacher Klassifikator (z. B. TF-IDF + logistische Regression) ist eine gute **Baseline**, siehe [Intents, Entities & Confidence](https://github.com/Michdo93/Informatik/blob/main/KI%20%26%20Sprachverarbeitung/Intents%2C%20Entities%20%26%20Confidence.md).
 
 #### 3. **Daten für Training erweitern**:
 
@@ -672,7 +708,7 @@ def chat():
     return jsonify({"reply": reply})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True)    # development only - in production use Gunicorn behind Nginx
 ```
 
 Man kann den nachfolgenden Teil kürzen:
@@ -684,8 +720,10 @@ elif "licht" in user_message and "flur" in user_message and "aus" in user_messag
 Dieser könnte auch wie folgt dann aussehen:
 
 ```python
-elif ["licht", "flur", "aus"] in user_message:
+elif all(word in user_message for word in ["licht", "flur", "aus"]):
 ```
+
+(Der Ausdruck `["licht", "flur", "aus"] in user_message` funktioniert in Python **nicht** – eine Liste kann nicht in einem String gesucht werden. `all(...)` prüft, ob **jedes** Wort vorkommt. Achtung: `"aus" in user_message` ist auch bei „H**aus**“ wahr – besser den Satz vorher in Wörter zerlegen.)
 
 Idealerweise würde man hier natürlich auch die Worte aus einer Datenbank auslesen und Regeln über Datenbanken erstellen lassen. Auch eine Möglichkeit für Synonyme wäre, dass man z. B. `flur` und `Flur` erlaubt. Ebenfalls möglich ist es, dass man alle Worte einheitlich zu klein ändert, damit man die Groß-/Kleinschreibung als Fehlerquelle elementiert. Dies kann ja auch mal versehentlich durch Tippfehler bei der Chateingabe entstehen.
 
@@ -840,195 +878,24 @@ oder:
 
 ---
 
-# Hintergrundwissen
+## Hintergrundwissen
 
-## Fuzzy Matching
+Die Grundlagen zu den Begriffen dieser Idee sind im Kompendium **Informatik** ausführlich erklärt:
 
-Das **Fuzzy Matching** kann man im deutschen als unscharfe Suche betiteln. Es ist eine Klasse von String-Matching-Algorithmen, mit der man bestimmte Zeichenketten (Strings) in einer längeren Zeichenkette oder einem Text suchen bzw. finden können sollte.  Es wird daher auch oft als Fuzzy-Suche oder Fuzzy-String-Suche betitelt.
-
-Aus:
-
-[https://www.klippa.com/de/blog/informativ/fuzzy-matching-de/](https://www.klippa.com/de/blog/informativ/fuzzy-matching-de/)
-
-Mit Fuzzy-Matching kann ich darauf reagieren, wenn z. B. nur 80% eines Wortes/Satzes richtig erkannt wurde. Hier mal Beispiele.
-
-```
-Gesucht: Bestellnummer
-
-Richtig wären:
-Bestellnr.
-Bestelnummer
-Bestellnumer
-Bestellnummmer
-...
-```
-
-Also mögliche Tippfehler oder auch Abkürzungen sollen ja darufhin deuten, dass ein- und dasselbe Worte gemeint ist. In Zusammenhang mit Synonymen würde man durch Fuzzy Matching dem Benutzer so extrem viele Eingabemöglichkeiten ermöglichen. Man formuliert ja nicht nur Sätze um, man vertippt sich auch mal oder kürzt einzelne Wörter ab.
-
-**Fuzzy Matching** nimmt also Korrekturen vor. Dies könnten im allgemeinen die nachfolgenden sein:
-
-* **Einfügen** – Hinzufügen eines Buchstabens zur Vervollständigung des Wortes (z. B. `Rechnun` wird zu `Rechnung`)
-* **Löschen** – Entfernen eines Buchstabens aus einem Wort (z. B. `Rechnnung` wird zu `Rechnung`)
-* **Substitution** – Vertauschen eines Buchstabens, um ein Wort zu korrigieren (z. B. `Technung` wird zu `Rechnung`)
-* **Transposition** – Vertauschen von Buchstaben, um ein Wort zu korrigieren (z. B. `Rehcnung` wird zu `Rechnung`)
-
-Jeder Korrektur, die durchgeführt werden muss, wird eine „Bearbeitungsdistanz“ von 1 zugeschrieben. Die Bearbeitungsdistanzen beeinflussen die oben erwähnte Trefferquote. Wenn Sie beispielsweise eine Zeichenfolge mit 11 Zeichen haben und 2 Korrekturen vornehmen müssen, beträgt die endgültige Trefferquote **81,81 %**.
-
-```
-Berechnung: 100%- 2 / 11= 81.81%  
-```
-
-Neben diesen Korrekturen kann **Fuzzy Matching** auch verwendet werden, um Zeichensetzungen, zusätzliche Wörter und fehlende Leerzeichen in Zeichenketten oder Texten zu korrigieren.
+| Thema | Kurz | Ausführlich |
+| --- | --- | --- |
+| **Fuzzy Matching** | Unscharfe Suche über Editierdistanzen (Levenshtein, Damerau-Levenshtein, Hamming, Jaro-Winkler); korrigiert Tippfehler, aber keine Umformulierungen. In Python: **RapidFuzz** (Nachfolger von fuzzywuzzy) | [Fuzzy Matching](https://github.com/Michdo93/Informatik/blob/main/KI%20%26%20Sprachverarbeitung/Fuzzy%20Matching.md) |
+| **Intent, Entity, Confidence** | Intent = Absicht (Klasse), Entity = Parameter (Raum, Gerät, Wert), Confidence = Sicherheit der Zuordnung mit Schwellwert für Ausführen, Rückfrage oder Fallback | [Intents, Entities & Confidence](https://github.com/Michdo93/Informatik/blob/main/KI%20%26%20Sprachverarbeitung/Intents%2C%20Entities%20%26%20Confidence.md) |
+| **Synonyme in der Datenbank** | n:m-Beziehung über eine Zwischentabelle | [Relationale Modellierung](https://github.com/Michdo93/Informatik/blob/main/Datenbanken/Relationale%20Modellierung.md) |
+| **Training, Test, Metriken** | Daten aufteilen, Overfitting, Precision/Recall, Modellversionierung | [Machine-Learning-Grundlagen](https://github.com/Michdo93/Informatik/blob/main/KI%20%26%20Sprachverarbeitung/Machine-Learning-Grundlagen.md) |
+| **Whitelist** | Nur freigegebene Items dürfen gesteuert werden | [Whitelist & Blacklist](https://github.com/Michdo93/Informatik/blob/main/Zugriffskontrolle/Whitelist%20%26%20Blacklist.md) |
+| **REST API** | Commands (POST) vs. States (GET/PUT), Authentifizierung | [HTTP & REST](https://github.com/Michdo93/Informatik/blob/main/Netzwerk/HTTP%20%26%20REST.md) |
+| **Betrieb der Flask-App** | Gunicorn hinter Nginx statt `flask run` | [Web-Server & Deployment](https://github.com/Michdo93/Informatik/blob/main/Best%20Practices/Web-Server%20%26%20Deployment.md) |
 
 ---
 
-### Fuzzy-Matching-Algorithmen
-
-Fuzzy Matching fällt in die Kategorie der Methoden, für die es keinen spezifischen Algorithmus gibt, der alle Szenarien und Anwendungsfälle abdeckt. Daher werden wir einige der am häufigsten verwendeten und zuverlässigsten Fuzzy-Matching-Algorithmen für die Suche nach ungefähren Datenübereinstimmungen behandeln:
-
-* Levenshtein-Distanz (LD)
-* Hamming-Distanz (HD)
-* Damerau-Levenshtein
-
----
-
-#### Levenshtein-Distanz
-
-Die **Levenshtein-Distanz (LD)** ist eine Fuzzy-Matching-Technik, die zwei Zeichenfolgen beim Vergleich und der Suche nach einer Übereinstimmung berücksichtigt. Je höher der Wert der Levenshtein-Distanz ist, desto weiter sind die beiden Zeichenfolgen oder „Begriffe“ von einer identischen Übereinstimmung entfernt.
-
-Wie erhalten wir nun den Wert der Levenshtein-Distanz? Die LD zwischen den beiden Zeichenfolgen entspricht der Anzahl der Änderungen, die erforderlich sind, um eine Zeichenfolge in die andere umzuwandeln. Für die LD gelten das Einfügen, Löschen und Ersetzen eines einzelnen Zeichens als Bearbeitungsoperationen.
-
-Nehmen wir an, Sie möchten die LD zwischen „Rechnungsnummer“ und „Rechnungs-Nr.“ messen. Der Abstand zwischen den beiden Begriffen ist „1 x u“, „2 x m“ und „1 x e“, was einem Abstand von 4 entsprechen würde. Warum? Weil Sie diese Zeichen hinzufügen müssten, um eine Übereinstimmung zu erreichen. Siehe die Beispiele unten.
-
----
-
-##### Levenshtein-Abstand Beispiel
-
-> **Rechnungnummer** → Rechnung**s**nummer (Einfügung von „**s**“) – Abstand: 1  
-> **Rechnung numr** → Rechnungsnu**m**m**e**r (Einfügung von „**m**“ & „**e**“) – Abstand: 2  
-> **Rechnung nr** → Rechnungsn**u****m****m****e**r (Einfügung von „**u, m, m, e**“) – Abstand: 4
-
----
-
-#### Hamming-Distanz
-
-Die **Hamming-Distanz (HD)** unterscheidet sich nicht allzu sehr von der Levenshtein-Distanz. Die Hamming-Distanz wird häufig verwendet, um den Abstand zwischen zwei gleich langen Textabschnitten zu berechnen.
-
-Die HD-Methode basiert auf der **ASCII**-Tabelle (American Standard Code for Information Interchange). Zur Berechnung des Abstandswertes verwendet der Hamming-Distanz-Algorithmus die Tabelle, um den Binärcode zu bestimmen, der jedem Buchstaben in den Zeichenketten zugeordnet ist.
-
----
-
-##### Hamming-Abstand-Beispiel
-
-Nehmen wir die folgenden Textzeichenfolgen „Number“ und „Lumber“ als Beispiel. Wenn wir versuchen, den HD zwischen den Zeichenfolgen zu bestimmen, ist der Abstand nicht 1, wie es mit dem Levenshtein-Algorithmus der Fall wäre. Stattdessen würde er 10 betragen. Das liegt daran, dass die ASCII-Tabelle einen Binärcode von **(1001110)** für den Buchstaben **N** und **(1001100)** für den Buchstaben **L** anzeigt.
-
-Beispielrechnung:
-
-> **D** = N – L = 1001110 – 1001100 = **10**
-
----
-
-#### Damerau-Levenshtein
-
-Das Damerau-Levenshtein-Verfahren misst auch den Abstand zwischen zwei Wörtern, indem es die erforderlichen Änderungen misst, die vorgenommen werden müssen, um ein Wort an das andere anzupassen. Diese Änderungen hängen von der Anzahl der Operationen ab, wie z. B. Einfügung, Löschung oder Ersetzung eines einzelnen Zeichens oder Transposition zweier benachbarter Zeichen.
-
-Hier unterscheidet sich die Damerau-Levenshtein-Distanz von der regulären Levenshtein-Distanz, da sie zusätzlich zu den Einzelzeichen-Editieroperationen, auch Transpositionen berücksichtigt, um eine ungefähre Übereinstimmung zu finden (Fuzzy Match).
-
----
-
-##### Damerau-Levenshtein Beispiel
-
-> **Zeichenfolge 1:** Re<strong>ch</strong>nun<strong>g</strong>  
-> **Zeichenfolge 2:** Re<strong>hc</strong>nun  
->   
-> **Operation 1:** Transposition → Vertauschen der Zeichen „**h**“ und „**c**“  
-> **Operation 2:** Einfügen eines „**g**“ am Ende der Zeichenfolge 2
-
-
-Da zwei Operationen erforderlich waren, um die beiden Wörter identisch zu gestalten, **beträgt der Abstand 2**. Vereinfacht ausgedrückt zählt jede Operation wie Einfügung, Löschung, Transposition usw. als ein Abstand von „1“. Mit der Levenshtein-Distanz müssten Sie jedoch drei Korrekturen vornehmen, was einem Abstand von 3 entspricht.
-
-Alle oben genannten Fuzzy-Matching-Algorithmen unterscheiden sich natürlich in der Art und Weise, wie die Bearbeitungsdistanz berechnet wird. Dies ist der Grund, warum es keinen FM-Algorithmus gibt, der für alle geeignet ist. Von den drei vorgestellten Algorithmen ist die Levenshtein-Distanz jedoch der am häufigsten verwendete FM-Algorithmus in der Datenverwaltung und Datenwissenschaft.
-
-Empfehlung: In Python kann man die [fuzzywuzzy-Bibliothek](https://github.com/seatgeek/fuzzywuzzy) testen oder einen eigenen Algorithmus implementieren.
-
----
-
-## Intent, Entity, Confidence Score
-
-Aus:
-
-[https://www.melibo.de/blog/was-sind-intent-und-entity](https://www.melibo.de/blog/was-sind-intent-und-entity)
-
----
-
-### Intent
-
-Intents, zu Deutsch „Absichten“, sind Zwecke oder Ziele, die in den Eingaben eines Kunden zum Ausdruck kommen, um z.B. eine Frage zu einer Retoure zu stellen. Durch die Erkennung der Absicht, die sich in der Kundeneingabe ausdrückt, versucht der KI-Chatbot den richtigen Dialog zu finden und die passende Ausgabe zu wählen. Dafür nutzen KI-Chatbots maschinelles Lernen, um in natürlicher Sprache die vorher definierte Absicht (Intent) zu erkennen. [1] Einfach gesagt, Intents sind Fragen der User:innen, die dem Chatbot zu einem speziellen Thema gestellt werden und der Versuch des KI-Chatbots, die passende Antwort zu erkennen, um das Problem zu lösen bzw. die Frage zu beantworten.
-
----
-
-#### Wie funktionieren Intents?
-
-Bestehende Anbieter wie unter anderem der IBM Watson Assistant [1], Rasa [2] oder Microsoft LUIS [3] basieren alle meist auf dem Prinzip der Intent-Ausgabe. Bevor der Chatbot Intents erkennen kann, müssen erst mal alle Absichten der User:innen definiert werden. Hierfür ist es wichtig, dass man seine Kundenanfragen erst mal identifiziert und seinen Use-Case richtig versteht. Nachdem der Intent-Katalog erstellt und der Bot online genommen wurde, werden die User:innen dem Chatbot Fragen stellen. Jede Anfrage der User:innen durchläuft das sogenannte Intent-Matching, also der Zuordnung der Anfrage aus den gesamten Inhalten des Chatbots. Dabei wird anhand von NLP (Natural Language Processing) ein Confidence-Score berechnet, um anhand von Wahrscheinlichkeiten die passende Antwort auszugeben.
-
----
-
-### Confidence-Score
-
-Ein kurzer Exkurs zum Thema Confidence-Scores. Die Confidence-Scores liegen zwischen 0 und 1 und geben an, zu wie viel Prozent der Chatbot ein Intent erkannt hat. Zu jeder gestellten Frage der User:innen berechnet der Chatbot also einen Confidence-Score und versucht auf dieser Grundlage, durch Wahrscheinlichkeiten, die richtige Antwort an die User:innen auszugeben. Die Confidence-Scores sind meistens voreingestellt und liegen zwischen 0,6 und 0,7. Das heißt, dass der Chatbot Antworten nur dann ausgibt, wenn die Erkennungswahrscheinlichkeit bei mindestens 60 % liegt. Nehmen wir nun als Beispiel an, dass User:innen die Frage stellen „Was kannst du so?“, um zu erfahren, welche Themen der Chatbot überhaupt beantworten kann. Der KI-Chatbot erkennt zu 89 % Prozent den Intent „Was kannst du?“. In diesem Beispiel gibt der Chatbot die passende Antwort aus und beantwortet somit die Frage.
-
----
-
-#### Bestandteile eines Intents
-
-Ein Intent besteht also aus dem: Intentnamen, dem User-Input, dem Confidence-Score und einer Antwort. Abhängig von der genutzten Technologie können noch weitere Bestandteile dazu kommen, wie Variablen, Actions und Entities.
-
-Ein Beispiel für Intents
-
-(1) User-Input: Frage eines Users
-
-🙎‍♂️: „Vorteile eines Chatbots“
-🙎‍♂️: „Was können Chatbots besonders gut?“
-🙎‍♂️: „Warum sollte ich einen Chatbot holen?“
-
-(2) Confidence-Score und (3) Intentnamen „Vorteile Chatbot“: Berechnung der Wahrscheinlichkeit anhand vom User-Input
-
-🧮 : 100 % Erkennung des Intents „Vorteile Chatbot“
-
-(4) Antwort des Chatbots auf die Frage „Vorteile Chatbots“
-
-🤖 : Zu den Vorteilen von Chatbots gehören unter anderem und abhängig von der Branche: Automatisierung von Prozessen, wodurch Fehler beim Support reduziert sowie Zeit und Geld eingespart werden können. Verkürzte Wartezeiten für den Kunden. 24/7 Kundensupport. Effizientere Strukturen. Weniger manueller Aufwand für dich.
-
----
-
-### Entity
-
-Im Unterschied zu Intents dienen Entitys oder auch Entities dazu, Informationen der User:innen aus der natürlichen Sprache zu extrahieren. Jedes Entity verfügt über eine Reihe von Eigenschaften, die mit ihr verbunden sind. Dabei kannst du auf Informationen deines Entities zugreifen. Wie bei einem Intent gibt der Chatbot an, wie hoch der Confidence-Score liegt. Im Unterschied zu Intents liegt der Confidence-Score, aber bei 0 oder 1. Unabhängig davon, ob und wie die Erkennung des Entitys eingestellt ist, haben sogenannte System-Entites immer eine Erkennung von 1. Jedes Entity besitzt einen Wert, einen sogenannten Entitätswert. Bei der Erstellung von Entities ist es notwendig, dass neben dem Wert auch Typen definiert werden. Unter Typen versteht man allgemein Synonyme, also Wörter, die sich ebenfalls auf dasselbe Vorhaben beziehen, es nur anders umschreiben. Je mehr Synonyme ein Entity hat, desto besser die Erkennung des Chatbots [4].
-
-Grundsätzlich unterscheiden wir zwischen System-Entities und Customize-Entities. Die System-Entites sind voreingestellt, das heißt im System bereits enthalten. Darunter fallen etwa Zahlen, Uhrzeiten oder Adressen. Diese Entities sind besonders beliebt und wurden in der Vergangenheit besonders häufig verwendet. Die Customize-Entities dagegen sind selbst definierte Werte, die auf den jeweiligen Use-Case angepasst werden.
-
----
-
-#### Ein Beispiel für Entities in der Praxis
-
-🙎‍♂️: „Wann kommt mein Produkt Chatbot-Experte in der Landstraße 5 an?“
-
----
-
-#### Entities in diesem Beispiel:
-
-Produkt Chatbot Experte (Customize-Entity product_type)
-Landstraße 5 (Sytem-Entity street_adress)
-
----
-
-#### Vorteile von Entites:
-
-Mit Entities kann man User:innen durch Chat Flows in Form von Buttons navigieren, schnell Synonyme definieren und mehrere Anfragen auf einmal verarbeiten. Die System-Entitys helfen außerdem dabei, die beliebten Anfragen zum Thema Ort, Zeit und Adresse abzufangen.
-
-[1]: https://cloud.ibm.com/docs/assistant?topic=assistant-intents
-[2]: https://rasa.com/open-source/
-[3]: https://docs.microsoft.com/en-us/azure/cognitive-services/luis/luis-concept-utterance
-[4]: https://cloud.ibm.com/docs/assistant?topic=assistant-expression-language
-
----
+## Aktualitätshinweise (Stand 2026)
+
+* **LLM-basierte Ansätze** sind seit der ersten Fassung dieser Idee deutlich leistungsfähiger und auch lokal (z. B. über Ollama) betreibbar geworden. Die Ausschreibung grenzt externe KI-Dienste bewusst aus; ein lokales LLM als **Vergleichsansatz** oder als **Fallback** für nicht erkannte Eingaben kann trotzdem eine sinnvolle Erweiterung sein.
+* openHAB bringt mit dem **Human Language Interpreter** (z. B. Standard-Interpreter, HABot) bereits eigene Mechanismen zur Textinterpretation mit. Die Arbeit sollte diese kennen und sich davon abgrenzen.
+* Bei **Rasa** Ausrichtung und Lizenzbedingungen der aktuellen Version prüfen.

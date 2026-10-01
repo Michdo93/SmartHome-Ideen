@@ -1,5 +1,48 @@
 # Augmented Reality-basierte Steuerung von Smart-Home-Geräten über openHAB auf Android
 
+| | |
+| --- | --- |
+| **Art** | Bachelorarbeit |
+| **Schwerpunkte** | Mobile Development (Android), Augmented Reality, Bilderkennung/ML, REST |
+| **Ausschreibung** | [Android-AR-Steuerung mit openHAB.odt](Ausschreibungen/Android-AR-Steuerung%20mit%20openHAB.odt) |
+| **Verwandte Ideen** | [Chatbot](Chatbot%20f%C3%BCr%20openHAB.md), [Sprachassistent](Sprachassistent.md) |
+
+<!-- TOC -->
+## Inhaltsverzeichnis
+
+- [Kurzbeschreibung:](#kurzbeschreibung)
+- [Ziele der Arbeit:](#ziele-der-arbeit)
+- [Anforderungen](#anforderungen)
+  - [Funktionale Anforderungen:](#funktionale-anforderungen)
+  - [Nicht-funktionale Anforderungen:](#nicht-funktionale-anforderungen)
+- [Technologien & Frameworks (Auswahl):](#technologien--frameworks-auswahl)
+  - [📱 AR Frameworks:](#-ar-frameworks)
+- [🌐 Smart-Home Integration:](#-smart-home-integration)
+- [🧠 Bilderkennung & ML (optional):](#-bilderkennung--ml-optional)
+- [🧰 Weitere Technologien:](#-weitere-technologien)
+- [📊 Schaubild: Systemübersicht](#-schaubild-systemübersicht)
+- [Systemaufbau](#systemaufbau)
+  - [openHAB Config UI](#openhab-config-ui)
+  - [AR-Szene mit Kamerastream und 3D UI-Overlay mit Menü](#ar-szene-mit-kamerastream-und-3d-ui-overlay-mit-menü)
+  - [Gerätedatenbank](#gerätedatenbank)
+- [Mögliche AR-Vorgehensweise](#mögliche-ar-vorgehensweise)
+  - [Unity + Vuforia](#unity--vuforia)
+- [ARCore und Machine Learning](#arcore-und-machine-learning)
+  - [🧠 Architekturüberblick](#-architekturüberblick)
+  - [📱 Beispiel-Ablauf in deiner App](#-beispiel-ablauf-in-deiner-app)
+  - [🧰 Technologien, die du brauchst](#-technologien-die-du-brauchst)
+  - [🧪 ML-Vergleich: Wie geht das?](#-ml-vergleich-wie-geht-das)
+  - [🧩 Gerätemodell in Room (Beispiel)](#-gerätemodell-in-room-beispiel)
+  - [🧠 Workflow in Code (vereinfacht)](#-workflow-in-code-vereinfacht)
+  - [📦 Projektstruktur (Android-Kotlin)](#-projektstruktur-android-kotlin)
+  - [✅ Vorteile dieses Ansatzes:](#-vorteile-dieses-ansatzes)
+- [Handy trainiert selbst](#handy-trainiert-selbst)
+- [🔜 Nächste Schritte:](#-nächste-schritte)
+- [Aktualitätshinweise (Stand 2026)](#aktualitätshinweise-stand-2026)
+  - [Alternative zum On-Device-Training](#alternative-zum-on-device-training)
+- [Grundlagen im Kompendium Informatik](#grundlagen-im-kompendium-informatik)
+<!-- /TOC -->
+
 ## Kurzbeschreibung:
 
 Im Rahmen dieser Bachelorthesis soll eine Android-App entwickelt werden, die mithilfe von Augmented Reality (AR) Smart-Home-Geräte aus openHAB erkennt und interaktiv steuern kann. Die Geräte werden im Kamerabild identifiziert und mit einem überlagerten 3D-Interface versehen. Über dieses Interface soll der Benutzer Aktionen wie Ein-/Ausschalten, Werte einstellen oder Zustände abfragen können. Zudem soll eine Konfigurationsoberfläche implementiert werden, um die Verbindung zu openHAB über die REST-API herzustellen und neue Geräte mit Referenzbildern manuell einzupflegen.
@@ -78,7 +121,7 @@ Im Rahmen dieser Bachelorthesis soll eine Android-App entwickelt werden, die mit
 
 ## 📊 Schaubild: Systemübersicht
 
-<img src="https://raw.githubusercontent.com/Michdo93/SmartHome-Ideen/refs/heads/main/screenshots/ar_openhab.png" alt="ar_openhab" width="50%">
+<img src="screenshots/ar_openhab.png" alt="Systemübersicht AR-Steuerung" width="50%">
 
 ## Systemaufbau
 
@@ -269,11 +312,13 @@ fun loadOpenHabConfig(context: Context): OpenHabConfig {
 
 ###### ✅ Ergebnis
 
-Mit dieser Lösung kannst du:
+Mit dieser Lösung kann man:
 
-* Zwischen Basic Auth und API Token umschalten
-* Die openHAB-Zugangsdaten sicher verwalten
-* Diese Daten zur Authentifizierung bei REST-Calls verwenden
+* zwischen Basic Auth und API Token umschalten,
+* die openHAB-Zugangsdaten speichern,
+* diese Daten zur Authentifizierung bei REST-Aufrufen verwenden.
+
+> ⚠️ **Sicherheit:** `SharedPreferences` speichern Werte **im Klartext**. Für Passwörter und Tokens sollte man den **Android Keystore** bzw. einen darauf aufbauenden verschlüsselten Speicher verwenden. Außerdem ist ein **API-Token** dem Passwort vorzuziehen: Es lässt sich einzeln widerrufen. Basic Auth und Tokens nur über **HTTPS** übertragen – siehe [HTTP & REST](https://github.com/Michdo93/Informatik/blob/main/Netzwerk/HTTP%20%26%20REST.md).
 
 ### AR-Szene mit Kamerastream und 3D UI-Overlay mit Menü
 
@@ -437,7 +482,7 @@ Mit `Room` oder klassisch mit `SQLiteOpenHelper`.
 
 ---
 
-Gerne! Hier ist ein vollständiges **Room-Datenbankmodell** für dein AR/openHAB-Projekt mit Unterstützung für:
+Ein vollständiges **Room-Datenbankmodell** für das AR/openHAB-Projekt mit Unterstützung für:
 
 * Geräteverwaltung
 * Mehrere Bilder pro Gerät (Referenzbilder)
@@ -591,9 +636,11 @@ Wenn du **Unity + Vuforia** verwenden möchtest, um eine **AR-App für openHAB-G
 * **Unity Version** (z. B. 2021.3 LTS oder 2022.x) mit Android Build Support
 * **Vuforia Engine** (kostenlos, benötigt Developer License Key)
 * Android-Smartphone zum Testen
-* openHAB-Instanz mit aktivierter REST-API (Standard bei openHAB 2/3/4)
+* openHAB-Instanz mit REST-API (Standard seit openHAB 2, aktuell openHAB 5)
 
 ---
+
+> **Hinweis:** Die folgenden Einrichtungsschritte hängen stark von den Versionen von Unity und Vuforia ab und ändern sich regelmäßig (Vuforia wird inzwischen als Paket eingebunden, Menüpfade und XR-Einstellungen haben sich geändert). Sie zeigen das Prinzip – maßgeblich ist die aktuelle Vuforia-Dokumentation.
 
 #### 🏗️ **2. Unity-Projekt einrichten**
 
@@ -648,9 +695,10 @@ Wenn du **Unity + Vuforia** verwenden möchtest, um eine **AR-App für openHAB-G
 ##### b) Steuerung über HTTP (UnityWebRequest)
 
 ```csharp
+using System.Collections;          // needed for IEnumerator
+using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
-using System.Text;
 
 public class OpenHabController : MonoBehaviour
 {
@@ -791,7 +839,7 @@ Mit Unity + Vuforia kann man zumindest als kostenlose Android App nur eine Anwen
 
 ## ARCore und Machine Learning
 
-Super Entscheidung! 🎯 Mit **ARCore & ML (z. B. ML Kit oder TensorFlow Lite)** baust du eine **flexible AR-App**, bei der du:
+Mit **ARCore & ML (z. B. ML Kit oder TensorFlow Lite)** baust du eine **flexible AR-App**, bei der du:
 
 * eigene Bilder aus der App verwenden kannst (z. B. Geräte live fotografieren),
 * Geräte anhand dieser Bilder wiedererkennst (via Machine Learning),
@@ -950,7 +998,7 @@ com.yourapp.aropenhab
 
 ---
 
-Großartig! Hier ist dein vollständiger Leitfaden für die Erstellung einer **Android AR-App**, die mithilfe von **ARCore**, **Machine Learning (ML Kit oder TensorFlow Lite)** und **Sceneform** Geräte erkennt und über **openHAB** steuert.
+Im Folgenden ein Leitfaden für die Erstellung einer **Android AR-App**, die mithilfe von **ARCore**, **Machine Learning (ML Kit oder TensorFlow Lite)** und **Sceneform** Geräte erkennt und über **openHAB** steuert.
 
 ---
 
@@ -1223,11 +1271,35 @@ class DeviceTrainer(private val context: Context) {
 3. 🧠 TFLite Model Maker/Personalization für dynamisches Training
 4. 🌐 openHAB REST-Aufrufe zur Steuerung
 
-Soll ich nun auch:
+Weitere Bausteine, die im Rahmen der Arbeit auszuarbeiten sind:
 
-* Die `CameraX`-Integration einbauen?
-* Das Live-Bildklassifizierungs-Overlay mit Jetpack Compose oder Sceneform machen?
-* Eine UI für das Gerätekonfigurations-Training erstellen?
+* `CameraX`-Integration
+* Live-Overlay der Bildklassifizierung (Jetpack Compose oder eine 3D-Engine)
+* Oberfläche zum Aufnehmen von Referenzbildern und Trainieren neuer Geräte
 
-Sag einfach z. B. „Ja, bitte Kamera & UI hinzufügen“.
+---
 
+## Aktualitätshinweise (Stand 2026)
+
+Einige der oben genannten Werkzeuge haben sich seit der ersten Fassung dieser Idee verändert. Vor Projektbeginn prüfen:
+
+| Werkzeug | Hinweis |
+| --- | --- |
+| **Sceneform** | Von Google archiviert; als Nachfolger wird die Community-Bibliothek **SceneView** weiterentwickelt |
+| **TensorFlow Lite** | Wurde in **LiteRT** umbenannt; Bibliotheksnamen und Dokumentation haben sich geändert |
+| **TFLite Model Maker** | Nicht mehr gepflegt; Nachfolger ist der **MediaPipe Model Maker** |
+| **Vuforia** | Lizenzmodell und Funktionsumfang (insbesondere Cloud Recognition) aktuell prüfen |
+| **8th Wall** | Verfügbarkeit und Lizenzbedingungen prüfen |
+
+### Alternative zum On-Device-Training
+
+Statt das Modell auf dem Smartphone neu zu trainieren, kann man ein **vortrainiertes Modell nur als Merkmalsextraktor** nutzen: Jedes Referenzbild wird in einen **Merkmalsvektor (Embedding)** umgewandelt und gespeichert. Ein Kamerabild wird dem Gerät mit dem **ähnlichsten** gespeicherten Vektor zugeordnet (*Nearest Neighbour*). Neue Geräte kommen hinzu, indem man ihre Vektoren speichert – **ganz ohne Training**. Dieser Ansatz ist einfacher, schneller und ein guter Vergleichskandidat für die Arbeit („Vergleich der verschiedenen Lösungsansätze“).
+
+---
+
+## Grundlagen im Kompendium Informatik
+
+* [Machine-Learning-Grundlagen](https://github.com/Michdo93/Informatik/blob/main/KI%20%26%20Sprachverarbeitung/Machine-Learning-Grundlagen.md) – Transfer Learning, Embeddings, Datenaufteilung, Metriken, On-Device-KI
+* [Relationale Modellierung](https://github.com/Michdo93/Informatik/blob/main/Datenbanken/Relationale%20Modellierung.md) – Geräte und Bilder (1:n), Pfad vs. BLOB
+* [HTTP & REST](https://github.com/Michdo93/Informatik/blob/main/Netzwerk/HTTP%20%26%20REST.md) – openHAB REST API, Authentifizierung, Commands vs. States
+* [Proxy-Pattern](https://github.com/Michdo93/Informatik/blob/main/Design%20Pattern/Strukturmuster/Proxy.md) – Gerät in der App als Stellvertreter für das openHAB-Item

@@ -1,5 +1,40 @@
 # Entwicklung eines Machine-Learning-basierten Vorhersagesystems für Smart-Home-Gerätezustände am Beispiel von openHAB
 
+| | |
+| --- | --- |
+| **Art** | Bachelorarbeit |
+| **Schwerpunkte** | Machine Learning, Zeitreihen, Datenbanken (InfluxDB), Visualisierung |
+| **Ausschreibung** | [State Prediction mit openHAB.odt](Ausschreibungen/State%20Prediction%20mit%20openHAB.odt) |
+| **Verwandte Ideen** | [Chatbot](Chatbot%20f%C3%BCr%20openHAB.md) (Abfrage von Vorhersagen per Chat denkbar) |
+
+<!-- TOC -->
+## Inhaltsverzeichnis
+
+- [Alternative Arbeitstitel](#alternative-arbeitstitel)
+- [🛠️ Empfohlene Technologien / Architektur](#️-empfohlene-technologien--architektur)
+  - [1. Backend-Sprache & Framework](#1-backend-sprache--framework)
+  - [2. Datenzugriff](#2-datenzugriff)
+  - [3. Datenbank](#3-datenbank)
+  - [4. Machine Learning](#4-machine-learning)
+  - [5. Visualisierung & Dashboard](#5-visualisierung--dashboard)
+- [🧠 Beispiel-Features für ML-Modell](#-beispiel-features-für-ml-modell)
+- [🔗 Architektur-Schaubild](#-architektur-schaubild)
+- [✅ Beispiel-Anwendungsfall](#-beispiel-anwendungsfall)
+- [🧩 Weiterer Ausbau](#-weiterer-ausbau)
+- [🎯 Ziel des Dashboards](#-ziel-des-dashboards)
+- [💡 Grundfunktionen im Dashboard](#-grundfunktionen-im-dashboard)
+  - [🧩 Variante A: Manuelle Abfrage](#-variante-a-manuelle-abfrage)
+  - [🧩 Variante B: Kalender-Ansicht mit automatischer Prediction](#-variante-b-kalender-ansicht-mit-automatischer-prediction)
+  - [🧩 Variante C: Item-Detailansicht mit Heatmap](#-variante-c-item-detailansicht-mit-heatmap)
+- [🧠 Umsetzungsideen](#-umsetzungsideen)
+- [⚙️ Performance-Strategie](#️-performance-strategie)
+  - [Wenn es viele Items gibt:](#wenn-es-viele-items-gibt)
+- [🖼️ Prototyp-Skizze (Textbasiert)](#️-prototyp-skizze-textbasiert)
+- [➕ Erweiterungen](#-erweiterungen)
+- [Methodische Hinweise](#methodische-hinweise)
+- [Grundlagen im Kompendium Informatik](#grundlagen-im-kompendium-informatik)
+<!-- /TOC -->
+
 ## Alternative Arbeitstitel
 
 - Entwicklung eines Prognosesystems für Smart-Home-Zustände auf Basis historischer openHAB-Daten
@@ -142,7 +177,9 @@ Ich kann Persistence-Informationen sowohl über die REST API, als auch über die
    * Uhrzeit = 09:00
    * Wochentag = Dienstag
    * Historische Daten (z. B. 8 von 10 Tagen war das der Fall)
-2. Modell sagt: **94% Wahrscheinlichkeit**
+2. Modell sagt: **ca. 80 % Wahrscheinlichkeit**
+
+Wichtig: Eine gute Wahrscheinlichkeit muss **kalibriert** sein. Wenn die Kaffeemaschine an 8 von 10 vergleichbaren Tagen um 9:00 Uhr lief, ist etwa 80 % plausibel – 94 % wären nur gerechtfertigt, wenn weitere Informationen (z. B. Anwesenheit, Kalender) dafür sprechen.
 
 ---
 
@@ -300,4 +337,23 @@ Kaffeemaschine am 2025-05-15:
 * Automationen aus Prediction (z. B. Triggern von Regeln)
 * Feedback-Button („Ist das korrekt eingetreten?“ → Reinforcement Learning)
 
+---
 
+## Methodische Hinweise
+
+Diese Punkte entscheiden darüber, ob die Ergebnisse der Arbeit aussagekräftig sind:
+
+* **Chronologische Aufteilung:** Trainings- und Testdaten **zeitlich** trennen (z. B. Januar–Mai trainieren, Juni testen) und **nie** zufällig mischen – sonst lernt das Modell aus der Zukunft (Datenleck).
+* **Baseline:** Jedes Modell mit einer einfachen Häufigkeitsschätzung vergleichen („Anteil der Tage, an denen das Item zu dieser Uhrzeit an diesem Wochentag `ON` war“). Ein Modell ist nur dann ein Gewinn, wenn es diese Baseline **deutlich** schlägt.
+* **Metriken für Wahrscheinlichkeiten:** Neben Accuracy auch **Brier-Score**, **Log-Loss** und ein **Kalibrierungsdiagramm** betrachten.
+* **Persistence-Strategie:** Mit `everyChange` entsteht bei einem Schalter, der den ganzen Tag aus ist, **kein** Eintrag. Für Auswertungen zusätzlich eine feste Abtastrate verwenden oder den letzten Zustand fortschreiben (*forward fill*).
+* **Zyklische Merkmale:** Uhrzeit und Wochentag als Sinus/Kosinus kodieren, damit 23:00 und 00:00 als benachbart gelten.
+* **Datenschutz:** Zustandsverläufe verraten Anwesenheit und Gewohnheiten von Personen – Zweck, Zugriff und Speicherdauer in der Arbeit thematisieren.
+
+---
+
+## Grundlagen im Kompendium Informatik
+
+* [Machine-Learning-Grundlagen](https://github.com/Michdo93/Informatik/blob/main/KI%20%26%20Sprachverarbeitung/Machine-Learning-Grundlagen.md) – inkl. lauffähigem Beispiel einer Zustandsvorhersage mit chronologischer Aufteilung und Baseline
+* [Zeitreihen & openHAB Persistence](https://github.com/Michdo93/Informatik/blob/main/Datenbanken/Zeitreihen%20%26%20openHAB%20Persistence.md) – Strategien, `.persist`-Dateien, Daten per REST auslesen, Aufbereitung mit pandas
+* [HTTP & REST](https://github.com/Michdo93/Informatik/blob/main/Netzwerk/HTTP%20%26%20REST.md) – openHAB REST API
