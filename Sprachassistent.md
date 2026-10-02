@@ -63,6 +63,7 @@
   - [ASR/STT](#asrstt)
   - [TTS](#tts)
   - [STTS und TTSS](#stts-und-ttss)
+- [Vorarbeiten im Labor](#vorarbeiten-im-labor)
 - [Grundlagen im Kompendium Informatik](#grundlagen-im-kompendium-informatik)
 <!-- /TOC -->
 
@@ -1493,6 +1494,12 @@ Bei cloudbasierten Services spricht man auch gerne von `STTS` und `TTSS`, also v
 ---
 
 Ein koversationsfähiger Sprachassistent würde wahrscheinlich den Rahmen einer Abschlussarbeit ordentlich spregen. Könnte aber in Anschluss zu einer guten vorangegangenen Abschlussarbeit ein sehr spannendes Thema für eine Masterarbeit werden.
+
+---
+
+## Vorarbeiten im Labor
+
+Im Labor gibt es bereits einen Asterisk-Server mit Piper-TTS, eine Android-App zur Spracherkennung für openHAB und zwei Forks lokaler Sprachassistenten – siehe [Backlog → Lokale Sprachassistenten](https://github.com/Michdo93/Smart-Home-Labor-Backlog/blob/main/Experimente/Lokale-Sprachassistenten.md).
 
 ---
 

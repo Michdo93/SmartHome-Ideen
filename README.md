@@ -74,6 +74,12 @@ Im **[Smart-Home-Labor-Backlog](https://github.com/Michdo93/Smart-Home-Labor-Bac
 * **People Counter** – Personenzählung mit Tiefenkamera, Verbesserung der Zählgenauigkeit
 * **Gestensteuerung für den Newspaper Projector** – Gestenerkennung mit Kinect
 * **Reverse Engineering von Geräten ohne offene Schnittstelle** (z. B. Beam Labs Beam, Hologram Fan Projector)
+* **Berührungslose Interaktion mit Kinect-Kameras** – unsichtbare Wandschalter, interaktive Projektion
+* **NAO Gym Instructor** – Portierung einer früheren Abschlussarbeit auf Raspberry Pi und Kinect
+* **ROS 2 und openHAB** – Roboter und Smart Home tauschen Zustände und Befehle aus
+* **Smart Home Security Lab** – Sicherheitsthemen praktisch untersuchen
+
+Eine Übersicht über alle vorhandenen Repositories (integriert, ungetestet, deprecated) bietet die [Repository-Übersicht](https://github.com/Michdo93/Smart-Home-Labor-Backlog/blob/main/Repositories.md).
 
 ---
 

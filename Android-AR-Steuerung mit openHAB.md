@@ -40,6 +40,7 @@
 - [🔜 Nächste Schritte:](#-nächste-schritte)
 - [Aktualitätshinweise (Stand 2026)](#aktualitätshinweise-stand-2026)
   - [Alternative zum On-Device-Training](#alternative-zum-on-device-training)
+- [Vorarbeiten im Labor](#vorarbeiten-im-labor)
 - [Grundlagen im Kompendium Informatik](#grundlagen-im-kompendium-informatik)
 <!-- /TOC -->
 
@@ -1294,6 +1295,13 @@ Einige der oben genannten Werkzeuge haben sich seit der ersten Fassung dieser Id
 ### Alternative zum On-Device-Training
 
 Statt das Modell auf dem Smartphone neu zu trainieren, kann man ein **vortrainiertes Modell nur als Merkmalsextraktor** nutzen: Jedes Referenzbild wird in einen **Merkmalsvektor (Embedding)** umgewandelt und gespeichert. Ein Kamerabild wird dem Gerät mit dem **ähnlichsten** gespeicherten Vektor zugeordnet (*Nearest Neighbour*). Neue Geräte kommen hinzu, indem man ihre Vektoren speichert – **ganz ohne Training**. Dieser Ansatz ist einfacher, schneller und ein guter Vergleichskandidat für die Arbeit („Vergleich der verschiedenen Lösungsansätze“).
+
+---
+
+## Vorarbeiten im Labor
+
+* Eine Android-REST-Bibliothek für openHAB existiert bereits (`android-openhab-rest-client`).
+* Erste Experimente mit HoloLens und HTC Vive: [Backlog → VR und AR](https://github.com/Michdo93/Smart-Home-Labor-Backlog/blob/main/Experimente/VR-AR.md).
 
 ---
 
