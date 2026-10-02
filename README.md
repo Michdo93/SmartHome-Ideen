@@ -78,6 +78,7 @@ Im **[Smart-Home-Labor-Backlog](https://github.com/Michdo93/Smart-Home-Labor-Bac
 * **NAO Gym Instructor** – Portierung einer früheren Abschlussarbeit auf Raspberry Pi und Kinect
 * **ROS 2 und openHAB** – Roboter und Smart Home tauschen Zustände und Befehle aus
 * **Smart Home Security Lab** – Sicherheitsthemen praktisch untersuchen
+* **Smart-Home-Krimi in AR** – interaktives Krimi-/Escape-Erlebnis mit HoloLens, Robotern und openHAB
 
 Eine Übersicht über alle vorhandenen Repositories (integriert, ungetestet, deprecated) bietet die [Repository-Übersicht](https://github.com/Michdo93/Smart-Home-Labor-Backlog/blob/main/Repositories.md).
 
