@@ -10,6 +10,7 @@ Jede Idee beschreibt Ziel, Anforderungen, mögliche Architektur und Technologien
 - [Übersicht](#übersicht)
 - [Wie die Ideen zusammenhängen](#wie-die-ideen-zusammenhängen)
 - [Grundlagen](#grundlagen)
+- [Literatur und Stand der Technik](#literatur-und-stand-der-technik)
 - [Weitere Themen aus dem Labor-Backlog](#weitere-themen-aus-dem-labor-backlog)
 - [Eine neue Idee aufnehmen](#eine-neue-idee-aufnehmen)
 <!-- /TOC -->
@@ -63,6 +64,12 @@ Das nötige Hintergrundwissen ist im Kompendium **[Informatik](https://github.co
 | openHAB REST API, HTTP-Methoden, Authentifizierung | [HTTP & REST](https://github.com/Michdo93/Informatik/blob/main/Netzwerk/HTTP%20%26%20REST.md) |
 | Flask-Anwendungen richtig betreiben (Gunicorn, Nginx) | [Web-Server & Deployment](https://github.com/Michdo93/Informatik/blob/main/Best%20Practices/Web-Server%20%26%20Deployment.md) |
 | Projektdokumentation | [Best Practice Dokumentation](https://github.com/Michdo93/Informatik/blob/main/Best%20Practices/Dokumentation.md) |
+
+---
+
+## Literatur und Stand der Technik
+
+Für den „Stand der Technik“ in Abschlussarbeiten gibt es eine Sammlung von Themenfeldern, Suchbegriffen und Hinweisen auf vorhandene wissenschaftliche Arbeiten: [Literatur & verwandte Arbeiten](Literatur%20%26%20Verwandte%20Arbeiten.md).
 
 ---
 
